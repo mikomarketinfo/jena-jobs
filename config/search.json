@@ -26,6 +26,8 @@
       "Einkauf",
       "Minijob",
       "Ausbildung"
-    ]
+    ],
+    "location": "Deutschland",
+    "radius_any": true
   }
 }

@@ -362,7 +362,7 @@ def fetch_jooble(cfg):
     for kw in queries:
         if made >= per_run:
             break
-        payload = {"keywords": kw, "location": cfg["location"], "radius": str(radius),
+        payload = {"keywords": kw, "location": jc.get("location", cfg["location"]), "radius": "0" if jc.get("radius_any") else str(radius),
                    "page": "1", "ResultOnPage": str(jc.get("results_per_query", 50))}
         res, last_err = None, None
         for ep in list(endpoints):
