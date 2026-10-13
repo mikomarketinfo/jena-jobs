@@ -1,11 +1,11 @@
 {
- "check_wrong": "500",
- "check_right": "500",
- "letter_http": "500",
- "words": 0,
- "paragraphs": 0,
- "has_description": null,
- "placeholders": 0,
- "error": "BRIDGE_PASSWORD не задан в настройках Worker",
- "preview": ""
+ "check_wrong": "401",
+ "check_right": "200",
+ "letter_http": "200",
+ "words": 225,
+ "paragraphs": 5,
+ "has_description": true,
+ "placeholders": 1,
+ "error": null,
+ "preview": "Die Stelle als Lagermitarbeiter bei der Test GmbH in Jena passt nicht direkt zu meinem bisherigen beruflichen Werdegang, da ich mich acht Jahre lang selbstständig im Online-Handel betätigt habe und Erfahrungen im Einkauf, der Logistik und dem Versand gesammelt habe. \n\nTrotzdem bin ich überzeugt, dass meine Fähigkeiten und Erfahrungen in anderen Bereichen übertragbar sind und ich mich schnell in di"
 }
