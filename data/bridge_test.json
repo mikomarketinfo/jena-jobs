@@ -2,12 +2,12 @@
  "check_wrong": "401",
  "check_right": "200",
  "letter_http": "200",
- "words": 72,
+ "words": 78,
  "paragraphs": 3,
  "has_description": true,
  "placeholders": 1,
  "error": null,
- "letter": "Die Stelle als Minijob Warenannahme bei Hertel Nordbayern GmbH in Bobeck passt gut, weil ich Erfahrung im Umgang mit Waren und Logistik habe. \n\nDabei habe ich gelernt, wie wichtig es ist, sorgfältig zu arbeiten und genau zu zählen. \n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar und würde mich freuen, wenn wir uns unterhalten könnten, um mehr über die Stelle zu erfahren. Ich möchte langfristig bleiben und später gern mehr Stunden übernehmen.",
+ "letter": "Ich interessiere mich für die Stelle als Warenannahme bei Hertel Nordbayern GmbH, weil ich Erfahrung im Umgang mit Waren und im Einkauf habe. Ich kenne mich mit Wareneingang, Lagerorganisation und Versand aus.\n\nDabei habe ich gelernt, sorgfältig zu arbeiten und Abläufe zu organisieren. Ich bin zuverlässig und pünktlich, was wichtig für diese Stelle ist.\n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar und möchte langfristig bleiben. Ich wünsche mir ein Gespräch, um mehr über die Stelle zu erfahren.",
  "mentions_degree": false,
- "rewrite": "Die Stelle als Minijob Warenannahme bei Hertel Nordbayern GmbH in Bobeck passt gut, weil Erfahrung im Umgang mit Waren und Logistik vorhanden ist. \n\nDabei wurde gelernt, wie wichtig es ist, sorgfältig zu arbeiten und genau zu zählen. \n\nIn dieser Arbeit geht es darum, Waren sorgfältig anzunehmen und zu überprüfen. Ich bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar. Ich würde mich freuen, wenn wir uns unterhalten könnten."
+ "rewrite": "Ich interessiere mich für die Stelle als Warenannahme bei Hertel Nordbayern GmbH, weil ich Erfahrung im Umgang mit Waren und im Einkauf habe. Ich kenne mich mit Wareneingang, Lagerorganisation und Versand aus.\n\nDabei habe ich gelernt, sorgfältig zu arbeiten und Abläufe zu organisieren. Ich bin zuverlässig und pünktlich, was wichtig für diese Stelle ist.\n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar. Ich würde mich freuen, wenn wir uns unterhalten könnten, um mehr über die Stelle zu erfahren."
 }
