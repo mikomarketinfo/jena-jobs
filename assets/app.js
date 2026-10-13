@@ -458,6 +458,7 @@
     ]);
     state.data = data;
     if (profile) state.profile = profile;
+    window.__PROFILE = state.profile;
 
     $("#defaultSource").value = LS.get("defaultSource", LS.get("testResult", null) ? "test" : "profile");
     const useDefault = LS.get("useDefault", true);

@@ -1,0 +1,35 @@
+name: Выложить мост ИИ (Cloudflare Worker)
+
+on:
+  push:
+    branches: [main]
+    paths: ["worker/**", ".github/workflows/worker.yml"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Проверить секреты
+        id: check
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          PASS: ${{ secrets.BRIDGE_PASSWORD }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::warning::Нет секрета CLOUDFLARE_API_TOKEN — выкладка пропущена"; echo "ok=false" >> $GITHUB_OUTPUT; exit 0; fi
+          if [ -z "$PASS" ]; then echo "::warning::Нет секрета BRIDGE_PASSWORD — выкладка пропущена"; echo "ok=false" >> $GITHUB_OUTPUT; exit 0; fi
+          echo "ok=true" >> $GITHUB_OUTPUT
+
+      - name: Выложить Worker
+        if: steps.check.outputs.ok == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 4d7b394334d28ee8c87cc6d1a6e580b6
+          workingDirectory: worker
+          secrets: |
+            BRIDGE_PASSWORD
+        env:
+          BRIDGE_PASSWORD: ${{ secrets.BRIDGE_PASSWORD }}

@@ -1,0 +1,16 @@
+# Мост «Anschreiben с ИИ» (Cloudflare Workers AI)
+name = "round-forest-2940"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[ai]
+binding = "AI"
+
+[vars]
+# откуда разрешены запросы (через запятую)
+ALLOWED_ORIGINS = "https://mikomarketinfo.github.io"
+
+# Пароль моста — секрет BRIDGE_PASSWORD (не здесь!).
+# Его выставляет workflow .github/workflows/worker.yml из секрета репозитория BRIDGE_PASSWORD,
+# или вручную: Cloudflare → Worker → Settings → Variables and Secrets → Add → Secret.

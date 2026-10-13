@@ -102,6 +102,7 @@ window.LETTER = (function () {
       && !/Lebenslauf|Kurzprofil|Bewerbung|Persönlich|Kontakt|Ausbildung/i.test(l));
     if (name) out.name = name;
     out.hasSAP = /\bSAP\b/.test(t);
+    out.text = t.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
     return out;
   }
 
@@ -125,7 +126,7 @@ window.LETTER = (function () {
   }
   const todo = hint => `[[${hint}]]`;
 
-  function build(me) {
+  function build(me, aiBody) {
     const j = job;
     const isMj = (j.wt || []).includes("mj");
     const kind = j.type === "ausbildung" ? "ausbildung" : isMj ? "minijob" : "job";
@@ -137,6 +138,7 @@ window.LETTER = (function () {
     const myCity = (me.city || "").replace(/^\d{5}\s*/, "").trim() || todo("Ort");
     const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
     const place = (j.place || "").trim();
+    if (aiBody) return frame(aiBody);
 
     const other = me.mode === "other";
     const O = cfg.other || {};
@@ -275,6 +277,64 @@ window.LETTER = (function () {
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
+  // ---------------------------------------------------------------- ИИ (Cloudflare Workers AI через мост)
+  const bridgeUrl = () => (LS.get("bridgeUrl", "") || (window.__PROFILE && window.__PROFILE.ai_bridge_url) || "").replace(/\/+$/, "");
+
+  // резюме по умолчанию для «Я», если файл не загружен: факты из шаблонов профиля
+  function defaultCV() {
+    const b = cfg.blocks || {};
+    return [cfg.background, b.einkauf, b.lager, b.it, b.office, cfg.team, cfg.language].filter(Boolean)
+      .join("\n").replace(/\[\[.*?\]\]/g, "");
+  }
+
+  async function aiWrite() {
+    const url = bridgeUrl(), key = LS.get("bridgeKey", "");
+    if (!url || !key) { toggleAISettings(true); setAIStatus("Укажи адрес моста и пароль.", "err"); return; }
+    const me = readMe();
+    if (LS.get(draftKey(), null) && !confirm("Написать письмо с ИИ? Текущий текст будет заменён (контакты сохранятся).")) return;
+    const cv = me.cv || (me.mode === "me" ? defaultCV() : [me.background, me.summary, me.languages].filter(Boolean).join("\n"));
+    const btn = $("#lt-ai", root); btn.disabled = true; btn.textContent = "ИИ пишет… ~10–20 с";
+    setAIStatus("");
+    try {
+      const r = await fetch(url + "/letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Bridge-Key": key },
+        body: JSON.stringify({
+          job: { title: cleanTitle(job.title), employer: job.employer, place: job.place, beruf: job.beruf, type: job.type,
+            minijob: (job.wt || []).includes("mj"), qe: !!job.qe, ref: job.id && job.id.startsWith("ba:") ? job.id.slice(3) : "" },
+          cv, notes: me.extra || "",
+        }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+      const paras = d.text.split(/\n\s*\n/).map(x => x.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
+      renderLetter(build(me, paras));
+      setAIStatus(d.has_description ? "Готово. ИИ учёл описание вакансии — проверь текст." : "Готово (описание вакансии недоступно, письмо по названию) — проверь текст.", "ok");
+    } catch (e) {
+      setAIStatus("Ошибка: " + e.message, "err");
+    } finally {
+      btn.disabled = false; btn.textContent = "✨ Написать с ИИ";
+    }
+  }
+
+  async function aiCheck() {
+    LS.set("bridgeUrl", $("#lt-burl", root).value.trim());
+    LS.set("bridgeKey", $("#lt-bkey", root).value);
+    const url = bridgeUrl();
+    if (!url) { setAIStatus("Нет адреса моста.", "err"); return; }
+    try {
+      const r = await fetch(url + "/check", { method: "POST", headers: { "X-Bridge-Key": LS.get("bridgeKey", "") } });
+      const d = await r.json().catch(() => ({}));
+      setAIStatus(r.ok ? "Мост работает, пароль верный ✓" : ("Ошибка: " + (d.error || r.status)), r.ok ? "ok" : "err");
+    } catch (e) { setAIStatus("Мост недоступен: " + e.message, "err"); }
+  }
+
+  function setAIStatus(t, kind) { const el = $("#lt-aistatus", root); el.textContent = t; el.className = "small lt-aistatus " + (kind || ""); }
+  function toggleAISettings(force) {
+    const box = $("#lt-aiset", root); box.hidden = force === undefined ? !box.hidden : !force;
+    $("#lt-burl", root).value = bridgeUrl(); $("#lt-bkey", root).value = LS.get("bridgeKey", "");
+  }
+
   // ---------------------------------------------------------------- панель
   const OTHER_FIELDS = ["background", "summary", "languages"];
 
@@ -358,11 +418,19 @@ window.LETTER = (function () {
           </section>
           <section class="lt-result">
             <div class="lt-tools">
+              <button class="primary" id="lt-ai">✨ Написать с ИИ</button>
+              <button class="ghost" id="lt-aicfg" title="Настройки моста ИИ">⚙</button>
               <span class="lt-count" id="lt-count"></span>
               <button class="ghost" id="lt-next">К следующему пропуску</button>
               <button class="ghost" id="lt-pdf">Сохранить PDF</button>
               <button class="ghost" id="lt-docx">Сохранить Word</button>
             </div>
+            <div class="lt-aiset" id="lt-aiset" hidden>
+              <label class="fl">Адрес моста<input id="lt-burl" placeholder="https://round-forest-2940….workers.dev"></label>
+              <label class="fl">Пароль моста<input id="lt-bkey" type="password" autocomplete="off"></label>
+              <button class="ghost" id="lt-bcheck">Сохранить и проверить</button>
+            </div>
+            <p class="small lt-aistatus" id="lt-aistatus"></p>
             <div id="lt-editor" class="lt-editor" contenteditable="true" spellcheck="true" lang="de"></div>
             <p class="muted small">Текст можно править прямо здесь. Подсвеченные места — заполни или удали. Черновик для этой вакансии сохраняется автоматически.</p>
           </section>
@@ -379,6 +447,9 @@ window.LETTER = (function () {
       renderLetter(build(readMe()));
     };
     $("#lt-next", root).onclick = nextMark;
+    $("#lt-ai", root).onclick = aiWrite;
+    $("#lt-aicfg", root).onclick = () => toggleAISettings();
+    $("#lt-bcheck", root).onclick = aiCheck;
     $("#lt-pdf", root).onclick = () => savePDF().catch(err => alert(err.message));
     $("#lt-docx", root).onclick = () => saveDOCX().catch(err => alert(err.message));
     $("#lt-editor", root).addEventListener("input", afterEdit);
@@ -415,6 +486,7 @@ window.LETTER = (function () {
     const got = [];
     FIELDS.forEach(([k, label]) => { if (found[k]) { me[k] = found[k]; got.push(label); } });
     me.hasSAP = !!found.hasSAP;
+    if (found.text) me.cv = found.text.slice(0, 8000);
     savePerson(me); fillMe(me);
     $("#lt-filemsg", root).textContent = got.length
       ? `Из ${from} взято: ${got.join(", ")}. Проверь поля.`

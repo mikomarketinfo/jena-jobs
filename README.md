@@ -70,3 +70,17 @@ lebenslauf/                — место для CV (см. предупрежд�
 - GitHub может приостановить расписание, если в репозитории долго нет активности;
   ежедневные коммиты бота обычно этому мешают. Если обновления остановились — Actions → Enable / Run workflow.
 - Первый запуск: вакансии получают дату по дате публикации, поэтому сразу разойдутся по вкладкам.
+
+## Anschreiben с ИИ (Cloudflare Workers AI)
+
+Код моста — в папке `worker/`, выкладка — workflow «Выложить мост ИИ».
+
+1. Cloudflare → **My Profile → API Tokens → Create Token → шаблон «Edit Cloudflare Workers»** → Create → скопировать токен.
+2. GitHub → **Settings → Secrets and variables → Actions** → добавить:
+   - `CLOUDFLARE_API_TOKEN` — токен из шага 1;
+   - `BRIDGE_PASSWORD` — придуманный пароль моста.
+3. **Actions → «Выложить мост ИИ» → Run workflow** (или любой коммит в `worker/`).
+4. На сайте в помощнике Anschreiben нажать **⚙**, вставить адрес `https://round-forest-2940.<твой-поддомен>.workers.dev` и пароль → «Сохранить и проверить».
+
+Модель: `@cf/meta/llama-3.3-70b-instruct-fp8-fast`. Бесплатно — 10 000 Neurons в день (примерно 70+ писем).
+В ИИ уходит только название/описание вакансии и обезличенный текст резюме; имя и контакты остаются в браузере.

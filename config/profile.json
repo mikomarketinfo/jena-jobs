@@ -765,5 +765,6 @@
       "name": "Arbeitsagentur (сайт)",
       "url": "https://www.arbeitsagentur.de/jobsuche/suche?was={q}&wo={where}&umkreis={r}"
     }
-  ]
+  ],
+  "ai_bridge_url": ""
 }
