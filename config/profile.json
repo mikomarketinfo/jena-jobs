@@ -2,65 +2,201 @@
   "_comment": "Стандартные фильтры по целям и Lebenslauf. Галочка «Мои стандартные фильтры» возвращает к пресету default_preset. Пресет с union=true объединяет ключевые слова всех остальных.",
   "goal": "Любой из путей: миниджоб с ростом часов и ответственности до руководства небольшим филиалом/складом; Ausbildung в IT (устойчивое к ИИ направление); Ausbildung в логистике с выходом на руководство складом; Ausbildung или работа в закупках. Чистые продажи не рассматриваются.",
   "default_preset": "all",
-
   "common": {
     "exclude": [
-      "Verkäufer", "Verkäuferin", "Verkaufsberater", "Verkaufsmitarbeiter", "Kassierer", "Kassenkraft",
-      "Außendienst", "Telefonverkauf", "Telesales", "Callcenter", "Call Center", "Vertriebsmitarbeiter",
-      "Promoter", "Arzt", "Ärztin", "Professor", "Zahnmedizin"
+      "Verkäufer",
+      "Verkäuferin",
+      "Verkaufsberater",
+      "Verkaufsmitarbeiter",
+      "Kassierer",
+      "Kassenkraft",
+      "Außendienst",
+      "Telefonverkauf",
+      "Telesales",
+      "Callcenter",
+      "Call Center",
+      "Vertriebsmitarbeiter",
+      "Promoter",
+      "Arzt",
+      "Ärztin",
+      "Professor",
+      "Zahnmedizin",
+      "Personaldisponent",
+      "Leitstellendisponent",
+      "Recruiter",
+      "Kasse",
+      "Vertriebsdisponent",
+      "Ingenieur",
+      "Senior"
     ],
     "radius_km": 30,
-    "worktime": ["vz", "tz", "mj", "snw", "praktikum", "unknown"]
+    "worktime": [
+      "vz",
+      "tz",
+      "mj",
+      "snw",
+      "praktikum",
+      "unknown"
+    ]
   },
-
   "presets": [
     {
-      "id": "all", "name": "Все мои цели", "union": true,
+      "id": "all",
+      "name": "Все мои цели",
+      "union": true,
       "hint": "Все направления вместе: миниджобы с ростом, IT, логистика, закупки и дополнительные варианты.",
-      "filters": { "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "career" }
-    },
-    {
-      "id": "minijob", "name": "Миниджоб с ростом",
-      "hint": "Миниджобы там, где можно набрать часы и дорасти до Schichtleitung / Lagerleitung / руководства небольшой точкой без упора на продажи.",
       "filters": {
-        "keywords": ["Lager", "Logistik", "Kommissionier", "Inventur", "Warenverräum", "Warenannahme", "Versand", "Fahrrad", "Verleih", "Vermietung","Aushilfe Büro", "Bürohilfe", "Büroaushilfe", "IT-Support", "Haustechnik", "Hausmeister", "Elektro", "Kurier", "Zusteller", "Fahrer", "Werkstatt", "Rezeption", "Empfang"],
-        "show_job": true, "show_ausbildung": false, "minijob": "only", "career_only": false, "sort": "date"
+        "show_job": true,
+        "show_ausbildung": true,
+        "minijob": "include",
+        "career_only": false,
+        "sort": "career"
       }
     },
     {
-      "id": "it", "name": "IT",
+      "id": "minijob",
+      "name": "Миниджоб с ростом",
+      "hint": "Все миниджобы в радиусе, кроме продаж. Выбирай те, где можно набрать часы и расти: склад, прокат, сервис, офис, техника.",
+      "filters": {
+        "keywords": [],
+        "show_job": true,
+        "show_ausbildung": false,
+        "minijob": "only",
+        "career_only": false,
+        "sort": "date"
+      }
+    },
+    {
+      "id": "it",
+      "name": "IT",
       "hint": "Ausbildung Fachinformatiker (Systemintegration, Digitale Vernetzung, Daten- und Prozessanalyse), IT-System-Elektroniker; плюс вакансии для прямого входа (IT-Support, Administrator).",
       "filters": {
-        "keywords": ["Fachinformatiker", "Systemintegration", "Digitale Vernetzung", "Daten- und Prozessanalyse", "Prozessanalyse", "IT-System-Elektroniker", "IT-Systemelektroniker", "IT-System-Management", "Systemadministrator", "Administrator", "IT-Support", "Support", "Helpdesk", "Service Desk", "Netzwerk", "IT-Techniker", "IT-Systemkaufmann", "Informatik", "IT-Sicherheit", "Datenbank", "SQL", ".NET", "C#", "ERP", "SAP"],
-        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "date"
+        "keywords": [
+          "Fachinformatiker",
+          "Systemintegration",
+          "Digitale Vernetzung",
+          "Daten- und Prozessanalyse",
+          "Prozessanalyse",
+          "IT-System-Elektroniker",
+          "IT-Systemelektroniker",
+          "IT-System-Management",
+          "Systemadministrator",
+          "Administrator",
+          "IT-Support",
+          "Support",
+          "Helpdesk",
+          "Service Desk",
+          "Netzwerk",
+          "IT-Techniker",
+          "IT-Systemkaufmann",
+          "Informatik",
+          "IT-Sicherheit",
+          "Datenbank",
+          "SQL",
+          ".NET",
+          "C#",
+          "ERP",
+          "SAP"
+        ],
+        "show_job": true,
+        "show_ausbildung": true,
+        "minijob": "include",
+        "career_only": false,
+        "sort": "date"
       }
     },
     {
-      "id": "logistik", "name": "Логистика → склад",
+      "id": "logistik",
+      "name": "Логистика → склад",
       "hint": "Fachkraft für Lagerlogistik, Fachlagerist, Kaufmann für Spedition und Logistikdienstleistung; путь через Disponent / Schichtleiter к Lagerleitung.",
       "filters": {
-        "keywords": ["Lagerlogistik", "Fachlagerist", "Lager", "Kommissionier","Logistik", "Spedition", "Logistikdienstleistung", "Disponent", "Disposition", "Lagerleiter", "Lagerleitung", "Schichtleiter", "Warenwirtschaft", "Supply Chain", "Materialwirtschaft", "Versand"],
-        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "career"
+        "keywords": [
+          "Lagerlogistik",
+          "Fachlagerist",
+          "Lager",
+          "Kommissionier",
+          "Logistik",
+          "Spedition",
+          "Logistikdienstleistung",
+          "Disponent",
+          "Disposition",
+          "Lagerleiter",
+          "Lagerleitung",
+          "Schichtleiter",
+          "Warenwirtschaft",
+          "Supply Chain",
+          "Materialwirtschaft",
+          "Versand"
+        ],
+        "show_job": true,
+        "show_ausbildung": true,
+        "minijob": "include",
+        "career_only": false,
+        "sort": "career"
       }
     },
     {
-      "id": "einkauf", "name": "Закупки",
+      "id": "einkauf",
+      "name": "Закупки",
       "hint": "Kaufmann/-frau für Groß- und Außenhandelsmanagement, Industriekaufmann/-frau; с опытом закупок в своём магазине — также прямой вход: Sachbearbeiter Einkauf, Einkaufsassistenz.",
       "filters": {
-        "keywords": ["Einkauf", "Einkäufer", "Beschaffung", "Purchasing", "Procurement", "Groß- und Außenhandel", "Außenhandel", "Großhandel", "Industriekaufmann", "Industriekauffrau", "Materialwirtschaft", "Disposition", "Disponent", "Lieferantenmanagement", "Supply Chain"],
-        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "career"
+        "keywords": [
+          "Einkauf",
+          "Einkäufer",
+          "Beschaffung",
+          "Purchasing",
+          "Procurement",
+          "Groß- und Außenhandel",
+          "Außenhandel",
+          "Großhandel",
+          "Industriekaufmann",
+          "Industriekauffrau",
+          "Materialwirtschaft",
+          "Disposition",
+          "Disponent",
+          "Lieferantenmanagement",
+          "Supply Chain"
+        ],
+        "show_job": true,
+        "show_ausbildung": true,
+        "minijob": "include",
+        "career_only": false,
+        "sort": "career"
       }
     },
     {
-      "id": "extra", "name": "Ещё направления",
+      "id": "extra",
+      "name": "Ещё направления",
       "hint": "E-Commerce, Digitalisierungsmanagement, электрика (Energie- und Gebäudetechnik / Betriebstechnik), Zweiradmechatronik, планирование производства.",
       "filters": {
-        "keywords": ["E-Commerce", "Digitalisierungsmanagement", "Onlinehandel", "Online-Shop", "Webshop", "Elektroniker", "Elektriker", "Energie- und Gebäudetechnik", "Betriebstechnik", "Elektrotechnik", "Zweiradmechatroniker", "Fahrradmonteur", "Fahrradmechaniker", "Produktionsplanung", "Arbeitsvorbereitung", "Qualitätssicherung", "Prozessmanagement", "Projektassistenz"],
-        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "date"
+        "keywords": [
+          "E-Commerce",
+          "Digitalisierungsmanagement",
+          "Onlinehandel",
+          "Online-Shop",
+          "Webshop",
+          "Elektroniker",
+          "Elektriker",
+          "Energie- und Gebäudetechnik",
+          "Betriebstechnik",
+          "Elektrotechnik",
+          "Zweiradmechatroniker",
+          "Fahrradmonteur",
+          "Fahrradmechaniker",
+          "Produktionsplanung",
+          "Arbeitsvorbereitung",
+          "Qualitätssicherung",
+          "Prozessmanagement",
+          "Projektassistenz"
+        ],
+        "show_job": true,
+        "show_ausbildung": true,
+        "minijob": "include",
+        "career_only": false,
+        "sort": "date"
       }
     }
   ],
-
   "directions": [
     {
       "name": "Миниджоб → часы → руководство точкой",
@@ -105,10 +241,73 @@
       "ai": "Зависит от позиции; ERP/процессы — средний риск."
     }
   ],
-
   "career_keywords": {
-    "leitung": ["Lagerleiter", "Lagerleitung", "Leiter Lager", "Logistikleiter", "Teamleiter", "Teamleitung", "Schichtleiter", "Schichtleitung", "Schichtführer", "Stationsleiter", "Stationsleitung", "Filialleiter", "Filialleitung", "Standortleiter", "Standortleitung", "Einkaufsleiter", "Leiter Einkauf", "Abteilungsleiter", "Bereichsleiter", "Gruppenleiter", "Werkstattleiter", "Objektleiter", "Supervisor", "Vorarbeiter", "Meister"],
-    "sprungbrett": ["stellv", "stellvertretend", "Disponent", "Koordinator", "Key User", "Assistent der", "Assistenz der", "Nachwuchs", "Trainee", "Führungsnachwuchs", "Führungskraft", "Aufstieg", "Karriere", "Junior", "Fachwirt", "strategischer Einkäufer", "Shift Lead", "Projektassistenz", "Administrator"],
-    "einstieg_mit_perspektive": ["Lagerlogistik", "Fachlagerist", "Logistik", "Spedition", "Einkauf", "Einkäufer", "Beschaffung", "Groß- und Außenhandel", "Industriekaufmann", "Industriekauffrau", "Fachinformatiker", "IT-System", "IT-Support", "Digitalisierungsmanagement", "E-Commerce", "Elektroniker", "Disposition"]
+    "leitung": [
+      "Lagerleiter",
+      "Lagerleitung",
+      "Leiter Lager",
+      "Logistikleiter",
+      "Teamleiter",
+      "Teamleitung",
+      "Schichtleiter",
+      "Schichtleitung",
+      "Schichtführer",
+      "Stationsleiter",
+      "Stationsleitung",
+      "Filialleiter",
+      "Filialleitung",
+      "Standortleiter",
+      "Standortleitung",
+      "Einkaufsleiter",
+      "Leiter Einkauf",
+      "Abteilungsleiter",
+      "Bereichsleiter",
+      "Gruppenleiter",
+      "Werkstattleiter",
+      "Objektleiter",
+      "Supervisor",
+      "Vorarbeiter",
+      "Meister"
+    ],
+    "sprungbrett": [
+      "stellv",
+      "stellvertretend",
+      "Disponent",
+      "Koordinator",
+      "Key User",
+      "Assistent der",
+      "Assistenz der",
+      "Nachwuchs",
+      "Trainee",
+      "Führungsnachwuchs",
+      "Führungskraft",
+      "Aufstieg",
+      "Karriere",
+      "Junior",
+      "Fachwirt",
+      "strategischer Einkäufer",
+      "Shift Lead",
+      "Projektassistenz",
+      "Administrator"
+    ],
+    "einstieg_mit_perspektive": [
+      "Lagerlogistik",
+      "Fachlagerist",
+      "Logistik",
+      "Spedition",
+      "Einkauf",
+      "Einkäufer",
+      "Beschaffung",
+      "Groß- und Außenhandel",
+      "Industriekaufmann",
+      "Industriekauffrau",
+      "Fachinformatiker",
+      "IT-System",
+      "IT-Support",
+      "Digitalisierungsmanagement",
+      "E-Commerce",
+      "Elektroniker",
+      "Disposition"
+    ]
   }
 }

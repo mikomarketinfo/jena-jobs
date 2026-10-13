@@ -24,6 +24,14 @@
 
   // ------------------------------------------------------------------ helpers
   const lower = s => (s || "").toLocaleLowerCase("de");
+  // короткие слова (ERP, SAP, SQL…) ищем только целым словом, длинные — как часть слова (немецкие составные слова)
+  const reCache = new Map();
+  function hit(text, k) {
+    const kl = lower(k);
+    if (kl.length > 4) return text.includes(kl);
+    if (!reCache.has(kl)) reCache.set(kl, new RegExp("(^|[^\\p{L}\\p{N}])" + kl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "($|[^\\p{L}\\p{N}])", "u"));
+    return reCache.get(kl).test(text);
+  }
   const splitList = s => s.split(/[,\n;]/).map(x => x.trim()).filter(Boolean);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const daysAgo = iso => iso ? Math.floor((Date.now() - new Date(iso + "T00:00:00").getTime()) / 864e5) : null;
@@ -38,7 +46,9 @@
     const f = Object.assign({}, FALLBACK_FILTERS, P.common || {}, p.filters || {});
     if (p.union) {
       const all = presets.filter(x => !x.union).flatMap(x => (x.filters && x.filters.keywords) || []);
-      f.keywords = [...new Set([...all, ...((P.career_keywords || {}).leitung || [])])];
+      f.keywords = [...new Set(all)];
+      // миниджобы показываются все (кроме исключённых), ключевые слова к ним не применяются
+      f.minijob_any = presets.some(x => !x.union && x.filters && x.filters.minijob === "only" && !(x.filters.keywords || []).length);
     }
     return structuredClone(f);
   }
@@ -61,7 +71,7 @@
   function careerLevel(job) {
     const ck = state.profile.career_keywords || {};
     const text = lower(job.title + " " + (job.beruf || ""));
-    const has = list => (list || []).some(k => text.includes(lower(k)));
+    const has = list => (list || []).some(k => hit(text, k));
     if (has(ck.leitung)) return 3;
     if (has(ck.sprungbrett)) return 2;
     if (has(ck.einstieg_mit_perspektive)) return 1;
@@ -78,6 +88,7 @@
     $("#showJob").checked = !!f.show_job;
     $("#showAusbildung").checked = !!f.show_ausbildung;
     $("#careerOnly").checked = !!f.career_only;
+    $("#qeOnly").checked = !!f.qe_only;
     $("#sort").value = f.sort || "career";
   }
 
@@ -91,6 +102,8 @@
       show_job: $("#showJob").checked,
       show_ausbildung: $("#showAusbildung").checked,
       career_only: $("#careerOnly").checked,
+      minijob_any: !!(state.filters && state.filters.minijob_any),
+      qe_only: $("#qeOnly").checked,
       sort: $("#sort").value,
     };
   }
@@ -122,8 +135,9 @@
     const text = lower(job.title + " " + (job.beruf || ""));
     const textAll = text + " " + lower(job.employer);
     if (state.q && !lower(job.title + " " + job.employer + " " + job.place).includes(lower(state.q))) return false;
-    if (f.keywords.length && !f.keywords.some(k => text.includes(lower(k)))) return false;
-    if (f.exclude.some(k => textAll.includes(lower(k)))) return false;
+    const mjFree = f.minijob_any && (job.wt || []).includes("mj");
+    if (f.keywords.length && !mjFree && !f.keywords.some(k => hit(text, k))) return false;
+    if (f.exclude.some(k => hit(textAll, k))) return false;
     if (job.dist != null && job.dist > f.radius_km) return false;
 
     const wt = job.wt || [];
@@ -138,6 +152,7 @@
       }
     }
     if (f.career_only && careerLevel(job) === 0) return false;
+    if (f.qe_only && !job.qe && !isAusb) return false;
     return true;
   }
 
@@ -157,7 +172,8 @@
   function card(j) {
     const lvl = LVL[j._lvl];
     const fresh = daysAgo(j.first_seen);
-    const badges = (j.wt || []).map(w => `<span class="b ${w === "mj" ? "b-mj" : ""}">${esc(WT_LABEL[w] || w)}</span>`).join("");
+    const badges = (j.wt || []).map(w => `<span class="b ${w === "mj" ? "b-mj" : ""}">${esc(WT_LABEL[w] || w)}</span>`).join("") +
+      (j.qe ? `<span class="b b-qe" title="Работодатель готов взять без профильной Ausbildung">Quereinstieg</span>` : "");
     const alt = (j.alt || []).map(a => `<a class="alt" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.src)}</a>`).join(" ");
     return `<article class="job ${lvl ? lvl[2] : ""}">
       <div class="job-top">
@@ -355,7 +371,7 @@
     };
     ["#keywords", "#exclude"].forEach(s => $(s).addEventListener("change", onUserChange));
     $("#radius").addEventListener("input", onUserChange);
-    ["#showJob", "#showAusbildung", "#careerOnly", "#sort"].forEach(s => $(s).addEventListener("change", onUserChange));
+    ["#showJob", "#showAusbildung", "#careerOnly", "#qeOnly", "#sort"].forEach(s => $(s).addEventListener("change", onUserChange));
     $$("#worktime input").forEach(i => i.addEventListener("change", onUserChange));
     $$("#minijob button").forEach(b => b.onclick = () => {
       $$("#minijob button").forEach(x => x.classList.toggle("on", x === b)); onUserChange();

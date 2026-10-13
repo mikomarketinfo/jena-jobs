@@ -78,6 +78,7 @@ input[type=range] { accent-color: var(--accent); }
 .job-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; color: var(--muted); font-size: 13.5px; margin-top: 4px; }
 .job-foot { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 12px; }
 .b { background: var(--accent-soft); color: var(--accent); padding: 1px 8px; border-radius: 99px; font-weight: 600; }
+.b-qe { background: var(--gold-soft); color: var(--gold); }
 .b-mj { background: var(--mj-soft); color: var(--mj); }
 .muted { color: var(--muted); }
 .src { margin-left: auto; }

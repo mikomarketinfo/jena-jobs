@@ -147,7 +147,6 @@ def _debug(base, params, res):
         "keys": sorted(res.keys())[:20] if isinstance(res, dict) else type(res).__name__,
         "total": _total(res, None), "n": len(items),
         "item_keys": sorted(items[0].keys())[:30] if items and isinstance(items[0], dict) else None,
-        "sample": {k: (str(v)[:160]) for k, v in items[0].items()} if items and isinstance(items[0], dict) and len(API_DEBUG) < 2 else None,
     })
 
 
@@ -254,7 +253,7 @@ def fetch_ba(cfg):
                         ort = ort[0] if ort else {}
                     if isinstance(ort.get("adresse"), dict):
                         ort = dict(ort, **ort["adresse"])
-                    ko = _first(ort, "koordinaten", "koordinate") or {}
+                    ko = _first(ort, "koordinaten", "koordinate") or ort
                     emp = _first(it, "arbeitgeber", "arbeitgeberName", "firma") or ""
                     if isinstance(emp, dict):
                         emp = emp.get("name") or emp.get("anzeigeName") or ""
