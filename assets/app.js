@@ -20,6 +20,8 @@
     tab: "new",
     q: "",
     limit: { job: 50, ausbildung: 50 },
+    sourcesOff: [],
+    preset: null,
   };
 
   // ------------------------------------------------------------------ helpers
@@ -76,6 +78,45 @@
     if (job.qe || has(ck.einstieg)) return 3;
     if (has(ck.richtung)) return 2;
     return 0;
+  }
+
+  // название биржи: для агрегатора Jooble — исходный сайт (StepStone, Indeed …)
+  function srcName(j) {
+    const s = j.src || "";
+    if (s.startsWith("Jooble / ")) return s.slice(9).trim() || "Jooble";
+    return s.split(" /")[0] || "—";
+  }
+
+  function renderSources() {
+    const counts = {};
+    state.data.jobs.forEach(j => { const n = srcName(j); counts[n] = (counts[n] || 0) + 1; });
+    const inactive = Object.entries((state.data.meta || {}).sources || {})
+      .filter(([k, v]) => !v.ok && !counts[k]).map(([k, v]) => [k, v.note || "не подключён"]);
+    const chips = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) =>
+      `<button class="src-chip ${state.sourcesOff.includes(n) ? "" : "on"}" data-src="${esc(n)}" aria-pressed="${!state.sourcesOff.includes(n)}">${esc(n)} <span>${c}</span></button>`).join("") +
+      inactive.map(([n, note]) => `<button class="src-chip off" disabled title="${esc(note)} — см. README, раздел «Подключить больше бирж»">${esc(n)} <span>нет ключа</span></button>`).join("");
+    $("#sources").innerHTML = chips;
+    $$("#sources .src-chip[data-src]").forEach(b => b.onclick = () => {
+      const n = b.dataset.src;
+      state.sourcesOff = state.sourcesOff.includes(n) ? state.sourcesOff.filter(x => x !== n) : [...state.sourcesOff, n];
+      LS.set("sourcesOff", state.sourcesOff);
+      renderSources(); resetLimits(); render();
+    });
+  }
+
+  function renderExternal() {
+    const sites = state.profile.external_sites || [];
+    if (!sites.length) { $("#extRow").hidden = true; return; }
+    const p = (state.profile.presets || []).find(x => x.id === state.preset);
+    const q = state.q || (p && p.web_query) || (state.filters.keywords || [])[0] || "Quereinsteiger";
+    const where = (state.data.meta && state.data.meta.location) || "Jena";
+    const r = state.filters.radius_km || 25;
+    const slug = t => lower(t).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const url = t => t.replace("{qslug}", encodeURIComponent(slug(q))).replace("{whereslug}", encodeURIComponent(slug(where)))
+      .replace("{q}", encodeURIComponent(q)).replace("{where}", encodeURIComponent(where)).replace("{rindeed}", [5, 10, 15, 25, 35, 50, 100].find(x => x >= r) || 100).replace("{r}", r);
+    $("#extLinks").innerHTML = sites.map(s => `<a class="ext" href="${esc(url(s.url))}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>`).join("");
+    $("#extQuery").textContent = `«${q}»`;
+    $("#extRow").hidden = false;
   }
 
   function isLead(job) {
@@ -138,6 +179,7 @@
   // ------------------------------------------------------------------ matching
   function matches(job, f) {
     const isAusb = job.type === "ausbildung";
+    if (state.sourcesOff.length && state.sourcesOff.includes(srcName(job))) return false;
     if (isAusb && !f.show_ausbildung) return false;
     if (!isAusb && !f.show_job) return false;
 
@@ -217,6 +259,7 @@
     $("#cnt-new").textContent = nNew;
     $("#cnt-all").textContent = filtered.length - nNew;
 
+    renderExternal();
     const inTab = filtered.filter(j => state.tab === "new" ? isNew(j) : !isNew(j));
     ["job", "ausbildung"].forEach(type => {
       const list = sortJobs(inTab.filter(j => j.type === type), f.sort);
@@ -421,7 +464,9 @@
     $("#useDefault").checked = useDefault;
     state.filters = useDefault ? defaultFilters() : Object.assign({}, FALLBACK_FILTERS, LS.get("filters", defaultFilters()));
     writeFiltersToUI(state.filters);
+    state.sourcesOff = LS.get("sourcesOff", []);
     renderPresets();
+    renderSources();
     setActivePreset(useDefault && $("#defaultSource").value === "profile" ? state.profile.default_preset : LS.get("preset", null));
 
     // события

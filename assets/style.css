@@ -184,3 +184,17 @@ body.lt-open { overflow: hidden; }
   .lt-result { min-height: auto; }
   .lt-editor { padding: 18px 16px; font-size: 13.5px; min-height: 60vh; flex: none; }
 }
+
+/* биржи */
+.src-row, .ext-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 10px; }
+.src-label { font-size: 13px; color: var(--muted); font-weight: 600; }
+.sources, .ext-links { display: flex; flex-wrap: wrap; gap: 6px; }
+.src-chip { border: 1px solid var(--line); background: var(--bg); color: var(--muted); border-radius: 99px; padding: 4px 11px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: line-through; }
+.src-chip span { font-weight: 500; opacity: .8; }
+.src-chip.on { background: #2b5ea7; border-color: #2b5ea7; color: #fff; text-decoration: none; }
+.src-chip.off { cursor: not-allowed; text-decoration: none; opacity: .6; }
+.ext { border: 1px dashed var(--line); border-radius: 99px; padding: 4px 11px; font-size: 13px; font-weight: 600; text-decoration: none; color: var(--accent); }
+.ext:hover { border-color: var(--accent); background: var(--accent-soft); }
+.lt-person { display: flex; gap: 6px; align-items: flex-end; margin-bottom: 10px; }
+.lt-person .fl { flex: 1; margin: 0; }
+.lt-person select { width: 100%; }

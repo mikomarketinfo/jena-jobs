@@ -20,6 +20,21 @@ window.LETTER = (function () {
     ["email", "E-Mail", "name@example.de"],
   ];
 
+  // ---------------------------------------------------------------- люди (для кого письмо)
+  function people() {
+    let list = LS.get("people", null);
+    if (!list) {
+      const old = LS.get("me", {});
+      list = [Object.assign({ id: "me", label: "Я", mode: "me" }, old)];
+      LS.set("people", list);
+    }
+    return list;
+  }
+  const currentId = () => { const id = LS.get("person", "me"); return people().some(p => p.id === id) ? id : "me"; };
+  const current = () => people().find(p => p.id === currentId());
+  function savePerson(p) { LS.set("people", people().map(x => x.id === p.id ? p : x)); }
+  const draftKey = () => `letter_${currentId()}_${job.id}`;
+
   let cfg = null;       // profile.letter
   let job = null;       // текущая вакансия
   let root = null;      // DOM панели
@@ -123,8 +138,19 @@ window.LETTER = (function () {
     const today = new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
     const place = (j.place || "").trim();
 
+    const other = me.mode === "other";
+    const O = cfg.other || {};
     const body = [];
     body.push((cfg.intro[kind] || cfg.intro.job).replace("{title}", title).replace("{source}", source).replace(/\s+\./, "."));
+    if (other) {
+      body.push(me.background && me.background.trim() ? me.background.trim() : O.background);
+      body.push(me.summary && me.summary.trim() ? me.summary.trim() : O.block);
+      body.push(O.team + " " + O.learning);
+      body.push((me.languages && me.languages.trim() ? me.languages.trim() : O.language) + " " + (cfg.availability[kind] || cfg.availability.job));
+      if (me.extra && me.extra.trim()) body.push(me.extra.trim());
+      body.push(cfg.closing);
+      return frame(body);
+    }
     body.push(cfg.background);
     const block = cat === "generic" && kind === "ausbildung" ? cfg.blocks.ausbildung : (cfg.blocks[cat] || cfg.blocks.generic);
     let p3 = block;
@@ -136,9 +162,11 @@ window.LETTER = (function () {
     body.push(cfg.language + " " + (cfg.availability[kind] || cfg.availability.job));
     if (me.extra && me.extra.trim()) body.push(me.extra.trim());
     body.push(cfg.closing);
+    return frame(body);
 
     // блоки письма: {t: текст с [[ ]], a: выравнивание, cls}
-    const blocks = [
+    function frame(body) {
+    return [
       { t: [v("name"), v("street"), v("city"), v("phone"), v("email")].join("\n"), cls: "sender" },
       { t: [j.employer || todo("Firma"), todo("Ansprechpartner/in (falls bekannt)"), todo("Straße Hausnummer"), place ? place : todo("PLZ Ort")].join("\n"), cls: "recipient" },
       { t: `${myCity}, ${today}`, a: "right" },
@@ -148,7 +176,7 @@ window.LETTER = (function () {
       { t: `Mit freundlichen Grüßen\n\n\n${v("name")}` },
       { t: cfg.attachments, cls: "small" },
     ];
-    return blocks;
+    }
   }
 
   function renderLetter(blocks) {
@@ -166,7 +194,7 @@ window.LETTER = (function () {
     const n = pending().length;
     $("#lt-count", root).textContent = n ? `Нужно заполнить: ${n}` : "Всё заполнено ✓";
     $("#lt-count", root).classList.toggle("ok", !n);
-    if (job) LS.set("letter_" + job.id, ed.innerHTML);
+    if (job) LS.set(draftKey(), ed.innerHTML);
   }
 
   const pending = () => $$("#lt-editor mark.todo", root).filter(m => !m.classList.contains("done"));
@@ -248,17 +276,33 @@ window.LETTER = (function () {
   }
 
   // ---------------------------------------------------------------- панель
+  const OTHER_FIELDS = ["background", "summary", "languages"];
+
   function readMe() {
-    const me = LS.get("me", {});
+    const me = current();
     FIELDS.forEach(([k]) => { me[k] = $(`#lt-${k}`, root).value; });
     me.extra = $("#lt-extra", root).value;
-    LS.set("me", me);
+    OTHER_FIELDS.forEach(k => { me[k] = $(`#lt-${k}`, root).value; });
+    savePerson(me);
     return me;
   }
 
   function fillMe(me) {
     FIELDS.forEach(([k]) => { $(`#lt-${k}`, root).value = me[k] || ""; });
     $("#lt-extra", root).value = me.extra || "";
+    OTHER_FIELDS.forEach(k => { $(`#lt-${k}`, root).value = me[k] || ""; });
+    $("#lt-otherwrap", root).hidden = me.mode !== "other";
+    $("#lt-del", root).hidden = me.id === "me";
+    $("#lt-person", root).innerHTML = people().map(p => `<option value="${esc(p.id)}" ${p.id === me.id ? "selected" : ""}>${esc(p.label)}</option>`).join("");
+  }
+
+  function loadLetter() {
+    const me = current();
+    fillMe(me);
+    let draft = LS.get(draftKey(), null);
+    if (!draft && me.id === "me") draft = LS.get("letter_" + job.id, null); // старые черновики
+    if (draft) { $("#lt-editor", root).innerHTML = draft; afterEdit(); }
+    else renderLetter(build(me));
   }
 
   function ensureRoot() {
@@ -275,7 +319,14 @@ window.LETTER = (function () {
         <div class="lt-body">
           <section class="lt-data">
             <details open id="lt-datawrap">
-              <summary><b>Мои данные</b> <span class="muted">— хранятся только в этом браузере</span></summary>
+              <summary><b>Данные</b> <span class="muted">— хранятся только в этом браузере</span></summary>
+              <div class="lt-person">
+                <label class="fl">Для кого письмо
+                  <select id="lt-person"></select>
+                </label>
+                <button class="ghost" id="lt-add" title="Создать письмо для другого человека">+ Другой человек</button>
+                <button class="ghost" id="lt-del" title="Удалить этого человека">✕</button>
+              </div>
               <label class="lt-file">📄 Загрузить Lebenslauf (PDF, Word .docx, .txt)
                 <input type="file" id="lt-file" accept=".pdf,.docx,.txt,.doc">
               </label>
@@ -286,6 +337,18 @@ window.LETTER = (function () {
               <button class="ghost" id="lt-parse">Взять данные из текста</button>
               <div class="lt-fields">
                 ${FIELDS.map(([k, label, ph]) => `<label class="fl">${label}<input id="lt-${k}" placeholder="${ph}"></label>`).join("")}
+              </div>
+              <div id="lt-otherwrap" hidden>
+                <p class="muted small">Для другого человека текст не берётся из твоего профиля — опиши кратко по-немецки, иначе в письме будут подсвеченные места.</p>
+                <label class="fl">Образование и опыт (1–2 предложения)
+                  <textarea id="lt-background" rows="2" placeholder="Ich habe eine Ausbildung als … und arbeite seit … als …"></textarea>
+                </label>
+                <label class="fl">Что подходит к вакансии
+                  <textarea id="lt-summary" rows="2" placeholder="In meiner Tätigkeit bei … habe ich …"></textarea>
+                </label>
+                <label class="fl">Языки
+                  <input id="lt-languages" placeholder="Ich spreche Deutsch (B1) und …">
+                </label>
               </div>
               <label class="fl">Дополнительный абзац (необязательно)
                 <textarea id="lt-extra" rows="2" placeholder="Например: почему именно эта фирма"></textarea>
@@ -310,13 +373,32 @@ window.LETTER = (function () {
     $("#lt-close", root).onclick = close;
     root.addEventListener("click", e => { if (e.target === root) close(); });
     document.addEventListener("keydown", e => { if (e.key === "Escape" && !root.hidden) close(); });
-    $("#lt-make", root).onclick = () => renderLetter(build(readMe()));
+    $("#lt-make", root).onclick = () => {
+      const pend = LS.get(draftKey(), null);
+      if (pend && !confirm("Создать письмо заново? Твои правки в тексте будут заменены.")) return;
+      renderLetter(build(readMe()));
+    };
     $("#lt-next", root).onclick = nextMark;
     $("#lt-pdf", root).onclick = () => savePDF().catch(err => alert(err.message));
     $("#lt-docx", root).onclick = () => saveDOCX().catch(err => alert(err.message));
     $("#lt-editor", root).addEventListener("input", afterEdit);
     FIELDS.forEach(([k]) => $(`#lt-${k}`, root).addEventListener("change", readMe));
     $("#lt-extra", root).addEventListener("change", readMe);
+    OTHER_FIELDS.forEach(k => $(`#lt-${k}`, root).addEventListener("change", readMe));
+    $("#lt-person", root).onchange = e => { readMe(); LS.set("person", e.target.value); loadLetter(); };
+    $("#lt-add", root).onclick = () => {
+      const label = prompt("Как назвать (например: Анна, брат)?");
+      if (!label || !label.trim()) return;
+      readMe();
+      const p = { id: "p" + Date.now().toString(36), label: label.trim(), mode: "other" };
+      LS.set("people", [...people(), p]); LS.set("person", p.id);
+      loadLetter(); $("#lt-datawrap", root).open = true;
+    };
+    $("#lt-del", root).onclick = () => {
+      const me = current(); if (me.id === "me") return;
+      if (!confirm(`Удалить «${me.label}» и его данные из этого браузера?`)) return;
+      LS.set("people", people().filter(p => p.id !== me.id)); LS.set("person", "me"); loadLetter();
+    };
     $("#lt-parse", root).onclick = () => applyParsed(parseCV($("#lt-paste", root).value), "текста");
     $("#lt-file", root).onchange = async e => {
       const f = e.target.files[0]; if (!f) return;
@@ -333,7 +415,7 @@ window.LETTER = (function () {
     const got = [];
     FIELDS.forEach(([k, label]) => { if (found[k]) { me[k] = found[k]; got.push(label); } });
     me.hasSAP = !!found.hasSAP;
-    LS.set("me", me); fillMe(me);
+    savePerson(me); fillMe(me);
     $("#lt-filemsg", root).textContent = got.length
       ? `Из ${from} взято: ${got.join(", ")}. Проверь поля.`
       : `В ${from} не нашлось контактов — заполни поля вручную.`;
@@ -345,12 +427,9 @@ window.LETTER = (function () {
     if (!cfg) { alert("Шаблоны писем не загружены."); return; }
     job = j;
     ensureRoot();
-    const me = LS.get("me", {});
-    fillMe(me);
+    const me = current();
     $("#lt-job", root).textContent = `${cleanTitle(j.title)} · ${j.employer || ""}`;
-    const draft = LS.get("letter_" + j.id, null);
-    if (draft) { $("#lt-editor", root).innerHTML = draft; afterEdit(); }
-    else renderLetter(build(me));
+    loadLetter();
     // если данных ещё нет — раскрываем блок данных, иначе сворачиваем на телефоне
     $("#lt-datawrap", root).open = !me.name || window.innerWidth > 900;
     root.hidden = false;

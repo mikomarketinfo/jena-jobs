@@ -105,7 +105,8 @@
         "minijob": "include",
         "career_only": false,
         "sort": "career"
-      }
+      },
+      "web_query": "Quereinsteiger"
     },
     {
       "id": "minijob",
@@ -118,7 +119,8 @@
         "minijob": "only",
         "career_only": false,
         "sort": "date"
-      }
+      },
+      "web_query": "Minijob"
     },
     {
       "id": "sap",
@@ -143,7 +145,8 @@
         "minijob": "include",
         "career_only": false,
         "sort": "career"
-      }
+      },
+      "web_query": "SAP"
     },
     {
       "id": "it",
@@ -182,7 +185,8 @@
         "minijob": "include",
         "career_only": false,
         "sort": "date"
-      }
+      },
+      "web_query": "IT Support"
     },
     {
       "id": "logistik",
@@ -217,7 +221,8 @@
         "minijob": "include",
         "career_only": false,
         "sort": "career"
-      }
+      },
+      "web_query": "Lager"
     },
     {
       "id": "einkauf",
@@ -252,7 +257,8 @@
         "minijob": "include",
         "career_only": false,
         "sort": "career"
-      }
+      },
+      "web_query": "Einkauf"
     },
     {
       "id": "extra",
@@ -285,7 +291,8 @@
         "minijob": "include",
         "career_only": false,
         "sort": "date"
-      }
+      },
+      "web_query": "Sachbearbeiter"
     }
   ],
   "directions": [
@@ -728,6 +735,35 @@
       "ausbildung": "Ich kann die Ausbildung zum [[01.08.2027]] beginnen."
     },
     "closing": "Über eine Einladung zu einem persönlichen Gespräch freue ich mich sehr.",
-    "attachments": "Anlagen: Lebenslauf, Zeugnisse [[Liste prüfen]]"
-  }
+    "attachments": "Anlagen: Lebenslauf, Zeugnisse [[Liste prüfen]]",
+    "other": {
+      "background": "[[Ausbildung / Studium und wichtigste Berufserfahrung in 1–2 Sätzen]]",
+      "block": "[[Welche Erfahrungen und Kenntnisse passen genau zu dieser Stelle?]]",
+      "team": "Ich arbeite zuverlässig, strukturiert und gern im Team.",
+      "learning": "In neue Aufgaben arbeite ich mich schnell ein und lerne gern dazu.",
+      "language": "[[Sprachkenntnisse, z. B. Deutsch B2, Englisch gut]]"
+    }
+  },
+  "external_sites": [
+    {
+      "name": "StepStone",
+      "url": "https://www.stepstone.de/jobs/{qslug}/in-{whereslug}?radius={r}"
+    },
+    {
+      "name": "Indeed",
+      "url": "https://de.indeed.com/jobs?q={q}&l={where}&radius={rindeed}"
+    },
+    {
+      "name": "LinkedIn",
+      "url": "https://www.linkedin.com/jobs/search/?keywords={q}&location={where}"
+    },
+    {
+      "name": "meinestadt.de",
+      "url": "https://jobs.meinestadt.de/{whereslug}/suche?words={q}"
+    },
+    {
+      "name": "Arbeitsagentur (сайт)",
+      "url": "https://www.arbeitsagentur.de/jobsuche/suche?was={q}&wo={where}&umkreis={r}"
+    }
+  ]
 }
