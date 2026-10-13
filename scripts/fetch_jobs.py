@@ -101,25 +101,80 @@ def classify(title: str, extra: str = "") -> tuple[str, list[str]]:
 BA_BASES = [
     "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/jobs",
     "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v6/jobs",
+    "https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v4/app/jobs",
 ]
 BA_HEADERS = {"X-API-Key": "jobboerse-jobsuche"}
+API_DEBUG: list = []  # краткая диагностика ответов API -> meta.api_debug
+
+
+def _items(res):
+    """Список вакансий из ответа (формат API менялся между версиями)."""
+    if not isinstance(res, dict):
+        return res if isinstance(res, list) else []
+    for k in ("stellenangebote", "ergebnisliste", "jobs", "content", "results", "items"):
+        if isinstance(res.get(k), list):
+            return res[k]
+    for v in res.values():
+        if isinstance(v, list) and v and isinstance(v[0], dict):
+            return v
+        if isinstance(v, dict):
+            sub = _items(v)
+            if sub:
+                return sub
+    return []
+
+
+def _total(res, fallback):
+    if isinstance(res, dict):
+        for k in ("maxErgebnisse", "totalElements", "total", "anzahl", "anzahlErgebnisse", "totalCount"):
+            if res.get(k) not in (None, ""):
+                try:
+                    return int(res[k])
+                except (TypeError, ValueError):
+                    pass
+        for v in res.values():
+            if isinstance(v, dict):
+                t = _total(v, None)
+                if t is not None:
+                    return t
+    return fallback
+
+
+def _debug(base, params, res):
+    items = _items(res)
+    API_DEBUG.append({
+        "url": base.split("jobsuche-service")[-1], "params": params,
+        "keys": sorted(res.keys())[:20] if isinstance(res, dict) else type(res).__name__,
+        "total": _total(res, None), "n": len(items),
+        "item_keys": sorted(items[0].keys())[:30] if items and isinstance(items[0], dict) else None,
+    })
 
 
 def ba_query(base, params, max_pages):
     """Возвращает (список, полностью_ли_пройдено)."""
     out, page, size = [], 1, 100
     while page <= max_pages:
-        q = dict(params, page=page, size=size, pav="false")
+        q = dict(params, page=page, size=size)
         url = base + "?" + urllib.parse.urlencode(q)
         res = http_json(url, headers=BA_HEADERS)
-        items = res.get("stellenangebote") or []
+        if page == 1 and len(API_DEBUG) < 12:
+            _debug(base, q, res)
+        items = _items(res)
         out.extend(items)
-        total = int(res.get("maxErgebnisse") or 0)
+        total = _total(res, 0)
         if not items or page * size >= total:
             return out, True
         page += 1
         time.sleep(0.4)
     return out, False
+
+
+def _first(d, *keys):
+    for k in keys:
+        v = d.get(k)
+        if v not in (None, "", [], {}):
+            return v
+    return None
 
 
 def fetch_ba(cfg):
@@ -135,17 +190,24 @@ def fetch_ba(cfg):
     keywords = cfg.get("keywords") or [None]
     base_params = {"wo": cfg["location"], "umkreis": cfg["radius_km"]}
 
-    # выбираем рабочую версию API
-    base = None
+    # выбираем рабочую версию API: ту, что реально отдаёт вакансии
+    base, fallback = None, None
     for b in BA_BASES:
         try:
-            http_json(b + "?" + urllib.parse.urlencode(dict(base_params, page=1, size=1)), headers=BA_HEADERS)
-            base = b
-            break
+            q = dict(base_params, angebotsart=1, page=1, size=5)
+            res = http_json(b + "?" + urllib.parse.urlencode(q), headers=BA_HEADERS)
+            _debug(b, q, res)
+            fallback = fallback or b
+            if _items(res):
+                base = b
+                break
         except Exception as e:  # noqa: BLE001
+            API_DEBUG.append({"url": b.split("jobsuche-service")[-1], "error": str(e)[:200]})
             log(f"BA {b}: {e}")
+    base = base or fallback
     if not base:
         raise RuntimeError("Jobsuche API недоступен")
+    log(f"BA: использую {base}")
 
     jobs: dict[str, dict] = {}
     complete = True
@@ -158,28 +220,42 @@ def fetch_ba(cfg):
             complete &= done
             log(f"BA {p} -> {len(items)}{'' if done else ' (обрезано)'}")
             for it in items:
-                ref = it.get("refnr")
+                if not isinstance(it, dict):
+                    continue
+                ref = _first(it, "refnr", "referenznummer", "refNr", "hashId", "id")
                 if not ref:
                     continue
+                ref = str(ref)
                 jid = "ba:" + ref
                 j = jobs.get(jid)
                 if j is None:
-                    ort = it.get("arbeitsort") or {}
-                    ko = ort.get("koordinaten") or {}
-                    title = it.get("titel") or it.get("beruf") or ""
+                    ort = _first(it, "arbeitsort", "stellenlokationen", "arbeitsorte") or {}
+                    if isinstance(ort, list):
+                        ort = ort[0] if ort else {}
+                    if isinstance(ort.get("adresse"), dict):
+                        ort = dict(ort, **ort["adresse"])
+                    ko = _first(ort, "koordinaten", "koordinate") or {}
+                    emp = _first(it, "arbeitgeber", "arbeitgeberName", "firma") or ""
+                    if isinstance(emp, dict):
+                        emp = emp.get("name") or emp.get("anzeigeName") or ""
+                    title = str(_first(it, "titel", "stellenangebotsTitel", "stellenbezeichnung", "beruf", "hauptberuf") or "")
+                    beruf = _first(it, "beruf", "hauptberuf") or ""
+                    if isinstance(beruf, dict):
+                        beruf = beruf.get("bezeichnung") or ""
+                    pub = str(_first(it, "aktuelleVeroeffentlichungsdatum", "veroeffentlichungsdatum", "veroeffentlichtAm", "modifikationsTimestamp") or "")
                     j = {
                         "id": jid,
                         "src": "Arbeitsagentur",
                         "title": title,
-                        "beruf": it.get("beruf") or "",
-                        "employer": it.get("arbeitgeber") or "",
-                        "place": " ".join(x for x in [ort.get("plz"), ort.get("ort")] if x),
-                        "lat": ko.get("lat"),
-                        "lon": ko.get("lon"),
+                        "beruf": str(beruf),
+                        "employer": str(emp),
+                        "place": " ".join(str(x) for x in [ort.get("plz"), ort.get("ort")] if x),
+                        "lat": ko.get("lat") or ko.get("breite"),
+                        "lon": ko.get("lon") or ko.get("laenge"),
                         "type": jtype,
                         "wt": [],
-                        "published": (it.get("aktuelleVeroeffentlichungsdatum") or "")[:10] or None,
-                        "start": (it.get("eintrittsdatum") or "")[:10] or None,
+                        "published": pub[:10] or None,
+                        "start": str(_first(it, "eintrittsdatum") or "")[:10] or None,
                         "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/" + urllib.parse.quote(ref),
                         "ext": it.get("externeUrl") or None,
                     }
@@ -359,6 +435,7 @@ def main():
             continue
         try:
             jobs, complete = fn(cfg)
+            complete = complete and len(jobs) > 0  # пустой ответ — не повод удалять старые вакансии
             fetched[family] = (jobs, complete)
             status[family] = {"ok": True, "count": len(jobs), "complete": complete}
         except LookupError as e:
@@ -381,6 +458,7 @@ def main():
             "updated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
             "location": cfg["location"], "radius_km": cfg["radius_km"], "new_days": cfg.get("new_days", 14),
             "center": cfg.get("center"), "sources": status, "removed_today": merged["removed_today"],
+            "api_debug": API_DEBUG[:12],
         },
         "jobs": merged["jobs"],
     }
