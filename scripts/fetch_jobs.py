@@ -357,12 +357,24 @@ def fetch_jooble(cfg):
     radii = [0, 4, 8, 16, 26, 40, 80]
     radius = next((r for r in radii if r >= cfg["radius_km"]), 80)
     jobs, made = {}, 0
+    hdr = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"}
+    endpoints = [f"https://jooble.org/api/{key}", f"https://de.jooble.org/api/{key}"]
     for kw in queries:
         if made >= per_run:
             break
-        res = http_json(f"https://de.jooble.org/api/{key}",
-                        data={"keywords": kw, "location": cfg["location"], "radius": str(radius),
-                              "page": "1", "ResultOnPage": str(jc.get("results_per_query", 50))})
+        payload = {"keywords": kw, "location": cfg["location"], "radius": str(radius),
+                   "page": "1", "ResultOnPage": str(jc.get("results_per_query", 50))}
+        res, last_err = None, None
+        for ep in list(endpoints):
+            try:
+                res = http_json(ep, data=payload, headers=hdr, retries=1)
+                endpoints = [ep]  # запоминаем рабочий адрес
+                break
+            except urllib.error.HTTPError as e:
+                last_err = e
+                log(f"Jooble {ep.split('/api/')[0]}: HTTP {e.code}")
+        if res is None:
+            raise last_err or RuntimeError("Jooble недоступен")
         made += 1
         for it in res.get("jobs") or []:
             title = it.get("title") or ""
