@@ -376,6 +376,11 @@ def fetch_jooble(cfg):
         if res is None:
             raise last_err or RuntimeError("Jooble недоступен")
         made += 1
+        API_DEBUG.append({"jooble": endpoints[0].split("/api/")[0], "q": kw,
+                          "keys": sorted(res.keys())[:15] if isinstance(res, dict) else type(res).__name__,
+                          "totalCount": res.get("totalCount") if isinstance(res, dict) else None,
+                          "n": len(res.get("jobs") or []) if isinstance(res, dict) else None,
+                          "raw": json.dumps(res, ensure_ascii=False)[:300] if not (isinstance(res, dict) and res.get("jobs")) else None})
         for it in res.get("jobs") or []:
             title = it.get("title") or ""
             snippet = re.sub(r"<[^>]+>", " ", it.get("snippet") or "")
@@ -514,7 +519,7 @@ def main():
             "updated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
             "location": cfg["location"], "radius_km": cfg["radius_km"], "new_days": cfg.get("new_days", 14),
             "center": cfg.get("center"), "sources": status, "removed_today": merged["removed_today"],
-            "api_debug": API_DEBUG[:12],
+            "api_debug": API_DEBUG[:12] + [x for x in API_DEBUG if "jooble" in x][:5],
             "jooble_used": cfg.get("_jooble_used", 0),
         },
         "jobs": merged["jobs"],
