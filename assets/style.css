@@ -98,4 +98,21 @@ input[type=range] { accent-color: var(--accent); }
 .dirs li { margin-bottom: 10px; }
 .dirs p { margin: 4px 0 0; color: var(--muted); }
 .btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+/* presets */
+.preset-row { margin-top: 10px; }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.presets button { border: 1px solid var(--line); background: var(--bg); border-radius: 99px; padding: 5px 12px; cursor: pointer; font-weight: 600; font-size: 13.5px; }
+.presets button.on { background: var(--accent); border-color: var(--accent); color: var(--card); }
+.preset-hint { margin: 6px 2px 0; color: var(--muted); font-size: 13px; min-height: 1em; }
+
+/* plan */
+.plan-card { max-width: 980px; }
+.goal { background: var(--accent-soft); color: var(--accent); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
+.plan-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin: 16px 0; }
+.plan { border: 1px solid var(--line); border-radius: 12px; padding: 14px; background: var(--bg); }
+.plan h3 { margin: 0 0 8px; font-size: 15.5px; display: flex; gap: 8px; align-items: baseline; }
+.plan .num { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--card); display: inline-grid; place-items: center; font-size: 12px; }
+.plan dl { margin: 0; font-size: 13.5px; }
+.plan dt { font-weight: 700; margin-top: 6px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+.plan dd { margin: 2px 0 0; }
 .foot { color: var(--muted); font-size: 13px; padding-top: 24px; padding-bottom: 40px; }

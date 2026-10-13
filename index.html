@@ -18,6 +18,7 @@
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="new" role="tab">Новые <span class="cnt" id="cnt-new">0</span></button>
       <button class="tab" data-tab="all" role="tab">Все остальные <span class="cnt" id="cnt-all">0</span></button>
+      <button class="tab" data-tab="plan" role="tab">Мой план</button>
       <button class="tab" data-tab="test" role="tab">Тест профориентации</button>
     </nav>
   </div>
@@ -37,6 +38,10 @@
       </select>
       <input type="search" id="q" placeholder="Быстрый поиск по названию или фирме…">
       <button class="ghost" id="toggleMore" aria-expanded="false">Все фильтры ▾</button>
+    </div>
+    <div class="preset-row" id="presetRow" hidden>
+      <div class="presets" id="presets"></div>
+      <p class="preset-hint" id="presetHint"></p>
     </div>
 
     <div class="filters-body" id="filtersBody" hidden>
@@ -101,6 +106,11 @@
         <div class="list" id="list-ausbildung"></div>
       </div>
     </div>
+  </section>
+
+  <!-- ПЛАН -->
+  <section id="view-plan" hidden>
+    <div class="test-card plan-card" id="planBox"></div>
   </section>
 
   <!-- ТЕСТ -->

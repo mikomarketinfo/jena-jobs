@@ -29,11 +29,33 @@
   const daysAgo = iso => iso ? Math.floor((Date.now() - new Date(iso + "T00:00:00").getTime()) / 864e5) : null;
   const fmtDate = iso => iso ? new Date(iso + "T00:00:00").toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }) : "";
 
+  // Пресет из profile.json → готовый набор фильтров
+  function presetFilters(id) {
+    const P = state.profile;
+    const presets = P.presets || [];
+    const p = presets.find(x => x.id === id);
+    if (!p) return structuredClone(Object.assign({}, FALLBACK_FILTERS, P.filters || {}));
+    const f = Object.assign({}, FALLBACK_FILTERS, P.common || {}, p.filters || {});
+    if (p.union) {
+      const all = presets.filter(x => !x.union).flatMap(x => (x.filters && x.filters.keywords) || []);
+      f.keywords = [...new Set([...all, ...((P.career_keywords || {}).leitung || [])])];
+    }
+    return structuredClone(f);
+  }
+
   function defaultFilters() {
     const src = $("#defaultSource").value;
     const test = LS.get("testResult", null);
     if (src === "test" && test) return structuredClone(test.filters);
-    return structuredClone(Object.assign({}, FALLBACK_FILTERS, state.profile.filters));
+    return presetFilters(state.profile.default_preset);
+  }
+
+  function setActivePreset(id) {
+    state.preset = id;
+    LS.set("preset", id);
+    $$("#presets button").forEach(b => b.classList.toggle("on", b.dataset.id === id));
+    const p = (state.profile.presets || []).find(x => x.id === id);
+    $("#presetHint").textContent = p ? p.hint : "";
   }
 
   function careerLevel(job) {
@@ -79,12 +101,14 @@
     $("#useDefault").checked = false;
     LS.set("useDefault", false);
     LS.set("filters", state.filters);
+    setActivePreset(null);
     resetLimits(); render();
   }
 
   function applyDefaults() {
     state.filters = defaultFilters();
     writeFiltersToUI(state.filters);
+    setActivePreset($("#defaultSource").value === "profile" ? state.profile.default_preset : null);
     LS.set("filters", state.filters);
     resetLimits(); render();
   }
@@ -98,16 +122,13 @@
     const text = lower(job.title + " " + (job.beruf || ""));
     const textAll = text + " " + lower(job.employer);
     if (state.q && !lower(job.title + " " + job.employer + " " + job.place).includes(lower(state.q))) return false;
-    // руководящие позиции и ступеньки к ним показываются всегда, даже без совпадения ключевых слов
-    if (f.keywords.length && !f.keywords.some(k => text.includes(lower(k))) && careerLevel(job) < 2) return false;
+    if (f.keywords.length && !f.keywords.some(k => text.includes(lower(k)))) return false;
     if (f.exclude.some(k => textAll.includes(lower(k)))) return false;
     if (job.dist != null && job.dist > f.radius_km) return false;
 
     const wt = job.wt || [];
     const isMj = wt.includes("mj");
-    if (isAusb) {
-      if (f.minijob === "only") return false;
-    } else {
+    if (!isAusb) {
       if (f.minijob === "only" && !isMj) return false;
       if (f.minijob === "exclude" && isMj) return false;
       if (!isMj) {
@@ -158,7 +179,7 @@
   }
 
   function render() {
-    if (state.tab === "test") return;
+    if (state.tab === "test" || state.tab === "plan") return;
     const f = state.filters;
     const newDays = state.data.meta.new_days || 14;
     const isNew = j => (daysAgo(j.first_seen) ?? 0) < newDays;
@@ -178,7 +199,6 @@
       col.classList.toggle("dim", !show);
       const box = $("#list-" + type);
       if (!show) { box.innerHTML = `<p class="empty">Колонка скрыта фильтром «Показывать».</p>`; return; }
-      if (type === "ausbildung" && f.minijob === "only") { box.innerHTML = `<p class="empty">Ausbildung не бывает миниджобом — выбери «вместе с другими», чтобы видеть эту колонку.</p>`; return; }
       if (!list.length) {
         box.innerHTML = `<p class="empty">${state.data.jobs.length ? "Нет вакансий под эти фильтры." : "Данных пока нет — дождись первого ежедневного запуска или запусти его вручную во вкладке Actions."}</p>`;
         return;
@@ -249,13 +269,56 @@
     saved ? showResult(saved) : showQuestions();
   }
 
+  // ------------------------------------------------------------------ plan
+  function renderPlan() {
+    const P = state.profile;
+    const dirs = P.directions || [];
+    const presets = (P.presets || []).filter(p => !p.union);
+    $("#planBox").innerHTML = `
+      <h2>Мой план</h2>
+      <p class="goal">${esc(P.goal || "")}</p>
+      <div class="plan-list">${dirs.map((d, i) => `
+        <article class="plan">
+          <h3><span class="num">${i + 1}</span>${esc(d.name)}</h3>
+          <dl>
+            <dt>Почему подходит</dt><dd>${esc(d.fit)}</dd>
+            <dt>Путь</dt><dd>${esc(d.path)}</dd>
+            <dt>ИИ и рынок</dt><dd>${esc(d.ai)}</dd>
+          </dl>
+        </article>`).join("")}</div>
+      <p class="muted">Быстрые подборки вакансий по направлениям:</p>
+      <div class="btns">${presets.map(p => `<button class="ghost" data-goto="${esc(p.id)}">${esc(p.name)}</button>`).join("")}</div>`;
+    $$("[data-goto]", $("#planBox")).forEach(b => b.onclick = () => { usePreset(b.dataset.goto); switchTab("new"); });
+  }
+
+  function usePreset(id) {
+    state.filters = presetFilters(id);
+    writeFiltersToUI(state.filters);
+    LS.set("filters", state.filters);
+    const isDefault = id === state.profile.default_preset && $("#defaultSource").value === "profile";
+    $("#useDefault").checked = isDefault; LS.set("useDefault", isDefault);
+    setActivePreset(id);
+    resetLimits(); render();
+  }
+
+  function renderPresets() {
+    const presets = state.profile.presets || [];
+    $("#presets").innerHTML = presets.map(p => `<button data-id="${esc(p.id)}">${esc(p.name)}</button>`).join("");
+    $$("#presets button").forEach(b => b.onclick = () => usePreset(b.dataset.id));
+    $("#presetRow").hidden = !presets.length;
+  }
+
   function switchTab(tab) {
     state.tab = tab;
     $$(".tab").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
-    $("#view-jobs").hidden = tab === "test";
-    $("#filters").hidden = tab === "test";
+    const jobsView = tab === "new" || tab === "all";
+    $("#view-jobs").hidden = !jobsView;
+    $("#filters").hidden = !jobsView;
     $("#view-test").hidden = tab !== "test";
-    if (tab === "test") renderTest(); else { resetLimits(); render(); }
+    $("#view-plan").hidden = tab !== "plan";
+    if (tab === "test") renderTest();
+    else if (tab === "plan") renderPlan();
+    else { resetLimits(); render(); }
   }
 
   // ------------------------------------------------------------------ init
@@ -272,6 +335,8 @@
     $("#useDefault").checked = useDefault;
     state.filters = useDefault ? defaultFilters() : Object.assign({}, FALLBACK_FILTERS, LS.get("filters", defaultFilters()));
     writeFiltersToUI(state.filters);
+    renderPresets();
+    setActivePreset(useDefault && $("#defaultSource").value === "profile" ? state.profile.default_preset : LS.get("preset", null));
 
     // события
     $$(".tab").forEach(b => b.onclick = () => switchTab(b.dataset.tab));

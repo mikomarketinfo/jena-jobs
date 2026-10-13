@@ -1,0 +1,114 @@
+{
+  "_comment": "Стандартные фильтры по целям и Lebenslauf. Галочка «Мои стандартные фильтры» возвращает к пресету default_preset. Пресет с union=true объединяет ключевые слова всех остальных.",
+  "goal": "Любой из путей: миниджоб с ростом часов и ответственности до руководства небольшим филиалом/складом; Ausbildung в IT (устойчивое к ИИ направление); Ausbildung в логистике с выходом на руководство складом; Ausbildung или работа в закупках. Чистые продажи не рассматриваются.",
+  "default_preset": "all",
+
+  "common": {
+    "exclude": [
+      "Verkäufer", "Verkäuferin", "Verkaufsberater", "Verkaufsmitarbeiter", "Kassierer", "Kassenkraft",
+      "Außendienst", "Telefonverkauf", "Telesales", "Callcenter", "Call Center", "Vertriebsmitarbeiter",
+      "Promoter", "Arzt", "Ärztin", "Professor", "Zahnmedizin"
+    ],
+    "radius_km": 30,
+    "worktime": ["vz", "tz", "mj", "snw", "praktikum", "unknown"]
+  },
+
+  "presets": [
+    {
+      "id": "all", "name": "Все мои цели", "union": true,
+      "hint": "Все направления вместе: миниджобы с ростом, IT, логистика, закупки и дополнительные варианты.",
+      "filters": { "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "career" }
+    },
+    {
+      "id": "minijob", "name": "Миниджоб с ростом",
+      "hint": "Миниджобы там, где можно набрать часы и дорасти до Schichtleitung / Lagerleitung / руководства небольшой точкой без упора на продажи.",
+      "filters": {
+        "keywords": ["Lager", "Logistik", "Kommissionier", "Inventur", "Warenverräum", "Warenannahme", "Versand", "Fahrrad", "Verleih", "Vermietung","Aushilfe Büro", "Bürohilfe", "Büroaushilfe", "IT-Support", "Haustechnik", "Hausmeister", "Elektro", "Kurier", "Zusteller", "Fahrer", "Werkstatt", "Rezeption", "Empfang"],
+        "show_job": true, "show_ausbildung": false, "minijob": "only", "career_only": false, "sort": "date"
+      }
+    },
+    {
+      "id": "it", "name": "IT",
+      "hint": "Ausbildung Fachinformatiker (Systemintegration, Digitale Vernetzung, Daten- und Prozessanalyse), IT-System-Elektroniker; плюс вакансии для прямого входа (IT-Support, Administrator).",
+      "filters": {
+        "keywords": ["Fachinformatiker", "Systemintegration", "Digitale Vernetzung", "Daten- und Prozessanalyse", "Prozessanalyse", "IT-System-Elektroniker", "IT-Systemelektroniker", "IT-System-Management", "Systemadministrator", "Administrator", "IT-Support", "Support", "Helpdesk", "Service Desk", "Netzwerk", "IT-Techniker", "IT-Systemkaufmann", "Informatik", "IT-Sicherheit", "Datenbank", "SQL", ".NET", "C#", "ERP", "SAP"],
+        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "date"
+      }
+    },
+    {
+      "id": "logistik", "name": "Логистика → склад",
+      "hint": "Fachkraft für Lagerlogistik, Fachlagerist, Kaufmann für Spedition und Logistikdienstleistung; путь через Disponent / Schichtleiter к Lagerleitung.",
+      "filters": {
+        "keywords": ["Lagerlogistik", "Fachlagerist", "Lager", "Kommissionier","Logistik", "Spedition", "Logistikdienstleistung", "Disponent", "Disposition", "Lagerleiter", "Lagerleitung", "Schichtleiter", "Warenwirtschaft", "Supply Chain", "Materialwirtschaft", "Versand"],
+        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "career"
+      }
+    },
+    {
+      "id": "einkauf", "name": "Закупки",
+      "hint": "Kaufmann/-frau für Groß- und Außenhandelsmanagement, Industriekaufmann/-frau; с опытом закупок в своём магазине — также прямой вход: Sachbearbeiter Einkauf, Einkaufsassistenz.",
+      "filters": {
+        "keywords": ["Einkauf", "Einkäufer", "Beschaffung", "Purchasing", "Procurement", "Groß- und Außenhandel", "Außenhandel", "Großhandel", "Industriekaufmann", "Industriekauffrau", "Materialwirtschaft", "Disposition", "Disponent", "Lieferantenmanagement", "Supply Chain"],
+        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "career"
+      }
+    },
+    {
+      "id": "extra", "name": "Ещё направления",
+      "hint": "E-Commerce, Digitalisierungsmanagement, электрика (Energie- und Gebäudetechnik / Betriebstechnik), Zweiradmechatronik, планирование производства.",
+      "filters": {
+        "keywords": ["E-Commerce", "Digitalisierungsmanagement", "Onlinehandel", "Online-Shop", "Webshop", "Elektroniker", "Elektriker", "Energie- und Gebäudetechnik", "Betriebstechnik", "Elektrotechnik", "Zweiradmechatroniker", "Fahrradmonteur", "Fahrradmechaniker", "Produktionsplanung", "Arbeitsvorbereitung", "Qualitätssicherung", "Prozessmanagement", "Projektassistenz"],
+        "show_job": true, "show_ausbildung": true, "minijob": "include", "career_only": false, "sort": "date"
+      }
+    }
+  ],
+
+  "directions": [
+    {
+      "name": "Миниджоб → часы → руководство точкой",
+      "fit": "Опыт: 8 лет своего онлайн-магазина, прокат с командой из 11 человек, миниджоб в прокате каноэ в Jena.",
+      "path": "Aushilfe (Minijob) на складе, в прокате или сервисе → Teilzeit/Vollzeit → Schichtleiter / Stationsleitung / стаж. руководитель → руководство складом или небольшим филиалом. Сразу говори на собеседовании, что хочешь расти и брать часы.",
+      "ai": "Низкий риск: работа с людьми, товаром и организацией смен."
+    },
+    {
+      "name": "IT: Fachinformatiker Systemintegration / Digitale Vernetzung, IT-System-Elektroniker, Daten- und Prozessanalyse",
+      "fit": "Bachelor Computer Science, Master Systemanalytik, практика в GÖPEL electronic (C#, .NET MVC, SQL, Active Directory), переквалификация на электрика.",
+      "path": "С высшим образованием Ausbildung часто можно сократить (обычно до ~2 лет) или пройти как Umschulung через Bildungsgutschein Agentur für Arbeit. Дальше: администратор → Teamleitung IT-Betrieb / Projektleitung.",
+      "ai": "Сети, железо, инфраструктура и безопасность требуют присутствия и ответственности — их ИИ заменяет медленнее, чем рутинное программирование. IT-System-Elektroniker хорошо сочетает IT и твою электрику. Daten- und Prozessanalyse ближе всего к твоему Master."
+    },
+    {
+      "name": "Логистика: Fachkraft für Lagerlogistik / Kaufmann für Spedition und Logistikdienstleistung",
+      "fit": "Управлял закупками и логистикой своего магазина, знаешь IT-системы — это ценно для складских систем (WMS/ERP).",
+      "path": "Ausbildung (сокращённая) → Disponent / Schichtleiter → Lagerleitung. Позже — Weiterbildung Fachwirt für Logistiksysteme.",
+      "ai": "Склады автоматизируются, но растёт спрос на тех, кто управляет людьми и системами одновременно."
+    },
+    {
+      "name": "Закупки: Groß- und Außenhandelsmanagement / Industriekaufmann",
+      "fit": "Международные закупки (Европа, Азия, Украина), переговоры — это прямо твой опыт.",
+      "path": "Можно пробовать сразу без Ausbildung: Sachbearbeiter Einkauf / Einkaufsassistenz. Иначе Ausbildung → Einkäufer → strategischer Einkauf → Teamleitung Einkauf.",
+      "ai": "Рутинные заказы автоматизируют, а переговоры, работа с поставщиками и анализ рисков остаются за людьми — твои сильные стороны."
+    },
+    {
+      "name": "Дополнительно: E-Commerce, Digitalisierungsmanagement",
+      "fit": "Онлайн-магазин + анализ систем = редкое сочетание.",
+      "path": "Kaufmann/-frau im E-Commerce или für Digitalisierungsmanagement → E-Commerce-Manager / Prozessmanager.",
+      "ai": "Средний риск: тексты и рутина автоматизируются, процессы и интеграция систем — нет."
+    },
+    {
+      "name": "Дополнительно: Elektroniker (Energie- und Gebäudetechnik / Betriebstechnik)",
+      "fit": "Уже есть Nachqualifizierung как электрик в ÜAG.",
+      "path": "Ausbildung / Umschulung → Elektroniker → Vorarbeiter / Meister → своя бригада. Очень высокий спрос в Thüringen.",
+      "ai": "Минимальный риск: физическая работа на объектах."
+    },
+    {
+      "name": "Прямой вход с дипломом",
+      "fit": "Master Systemanalytik можно официально оценить (Zeugnisbewertung ZAB, база anabin).",
+      "path": "С оценкой диплома открываются позиции IT-Support, ERP-Anwender / Key User, Disponent, Sachbearbeiter Einkauf без Ausbildung — быстрее и с большей зарплатой.",
+      "ai": "Зависит от позиции; ERP/процессы — средний риск."
+    }
+  ],
+
+  "career_keywords": {
+    "leitung": ["Lagerleiter", "Lagerleitung", "Leiter Lager", "Logistikleiter", "Teamleiter", "Teamleitung", "Schichtleiter", "Schichtleitung", "Schichtführer", "Stationsleiter", "Stationsleitung", "Filialleiter", "Filialleitung", "Standortleiter", "Standortleitung", "Einkaufsleiter", "Leiter Einkauf", "Abteilungsleiter", "Bereichsleiter", "Gruppenleiter", "Werkstattleiter", "Objektleiter", "Supervisor", "Vorarbeiter", "Meister"],
+    "sprungbrett": ["stellv", "stellvertretend", "Disponent", "Koordinator", "Key User", "Assistent der", "Assistenz der", "Nachwuchs", "Trainee", "Führungsnachwuchs", "Führungskraft", "Aufstieg", "Karriere", "Junior", "Fachwirt", "strategischer Einkäufer", "Shift Lead", "Projektassistenz", "Administrator"],
+    "einstieg_mit_perspektive": ["Lagerlogistik", "Fachlagerist", "Logistik", "Spedition", "Einkauf", "Einkäufer", "Beschaffung", "Groß- und Außenhandel", "Industriekaufmann", "Industriekauffrau", "Fachinformatiker", "IT-System", "IT-Support", "Digitalisierungsmanagement", "E-Commerce", "Elektroniker", "Disposition"]
+  }
+}

@@ -31,6 +31,21 @@ window.CAREER_TEST = (function () {
       keywords: ["Pflege", "Pflegehelfer", "Pflegefachkraft", "Betreuung", "Altenpflege", "Erzieher", "Sozialassistent"],
       path: "Pflegehelfer → Pflegefachkraft (Ausbildung 3 года) → Wohnbereichsleitung. Работа надёжная, но до руководства обычно дольше 2 лет.",
     },
+    it: {
+      name: "IT (инфраструктура, сети, данные)",
+      keywords: ["Fachinformatiker", "Systemintegration", "Digitale Vernetzung", "Prozessanalyse", "IT-System-Elektroniker", "Administrator", "IT-Support", "Helpdesk", "Netzwerk"],
+      path: "Ausbildung Fachinformatiker / IT-System-Elektroniker (с дипломом часто сокращается) → администратор → Teamleitung IT-Betrieb. Инфраструктура и сети менее подвержены замене ИИ, чем рутинное программирование.",
+    },
+    einkauf: {
+      name: "Закупки и снабжение",
+      keywords: ["Einkauf", "Einkäufer", "Beschaffung", "Groß- und Außenhandel", "Industriekaufmann", "Industriekauffrau", "Disposition", "Materialwirtschaft"],
+      path: "Ausbildung Groß- und Außenhandelsmanagement / Industriekaufmann или прямой вход Sachbearbeiter Einkauf → Einkäufer → Teamleitung Einkauf.",
+    },
+    elektro: {
+      name: "Электрика и техника зданий",
+      keywords: ["Elektroniker", "Elektriker", "Energie- und Gebäudetechnik", "Betriebstechnik", "Elektrotechnik"],
+      path: "Ausbildung / Umschulung Elektroniker → Vorarbeiter / Meister. Спрос очень высокий, ИИ практически не угрожает.",
+    },
   };
 
   // каждая опция: текст и баллы по направлениям; flags — особые настройки фильтров
@@ -40,12 +55,16 @@ window.CAREER_TEST = (function () {
       { t: "Работать руками, двигаться, что-то собирать или переносить", s: { logistik: 3, produktion: 2 } },
       { t: "Работать за компьютером и с документами", s: { buero: 3 } },
       { t: "Помогать людям, заботиться о ком-то", s: { pflege: 3, gastro: 1 } },
+      { t: "Разбираться в компьютерах, системах и процессах", s: { it: 3, einkauf: 1 } },
+      { t: "Договариваться с поставщиками, считать выгоду", s: { einkauf: 3, logistik: 1 } },
     ]},
     { q: "Какая обстановка тебе ближе?", a: [
       { t: "Магазин / торговый зал", s: { handel: 3 } },
       { t: "Склад, цех, производство", s: { logistik: 2, produktion: 3 } },
       { t: "Кафе, ресторан, отель", s: { gastro: 3 } },
-      { t: "Офис", s: { buero: 3 } },
+      { t: "Офис", s: { buero: 2, einkauf: 2 } },
+      { t: "IT-отдел, серверная", s: { it: 3 } },
+      { t: "Объекты, мастерская", s: { elektro: 3, produktion: 1 } },
     ]},
     { q: "Хочешь ли ты руководить людьми через 1–2 года?", a: [
       { t: "Да, это главная цель", s: { handel: 2, gastro: 2, logistik: 1 }, f: { career: 2 } },
@@ -86,6 +105,9 @@ window.CAREER_TEST = (function () {
       { t: "Офис, бухгалтерия, менеджмент", s: { buero: 3 } },
       { t: "Завод, стройка, ремонт", s: { produktion: 3 } },
       { t: "Уход, медицина, дети", s: { pflege: 3 } },
+      { t: "IT, программирование, анализ систем", s: { it: 3 } },
+      { t: "Закупки, свой бизнес / магазин", s: { einkauf: 3, logistik: 1 } },
+      { t: "Электрика", s: { elektro: 3 } },
     ]},
     { q: "Был ли у тебя опыт руководства (бригадир, старший смены, свой бизнес)?", a: [
       { t: "Да", s: { handel: 1, logistik: 1, gastro: 1 }, f: { career: 1, lead: true } },
