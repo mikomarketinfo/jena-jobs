@@ -2,10 +2,12 @@
  "check_wrong": "401",
  "check_right": "200",
  "letter_http": "200",
- "words": 214,
- "paragraphs": 5,
+ "words": 116,
+ "paragraphs": 3,
  "has_description": true,
  "placeholders": 1,
  "error": null,
- "preview": "Die Stelle als Fachkraft für Lagerlogistik bei der Arcon Personalservice GmbH in Apolda passt aufgrund meiner Erfahrungen im Online-Handel, insbesondere im Bereich Logistik und Versand. Als selbstständiger Unternehmer im Online-Handel habe ich acht Jahre lang internationale Einkäufe getätigt, Logistik und Versand organisiert sowie Kundenkommunikation geführt.\n\nMeine Führungserfahrung als Leiter eines Teams von 11 Mitarbeitenden könnte bei der Überwachung der Lagerbestände und der Weitergabe von Informationen an andere Abteilungen oder Logistikpartner nützlich sein. Darüber hinaus habe ich durch meine Tätigkeit im Online-Handel Erfahrung im Umgang mit verschiedenen Softwaresystemen gesammelt,"
+ "letter": "Ich bin an einer Tätigkeit in der Warenannahme interessiert, weil ich bereits Erfahrungen im Umgang mit Waren und Logistik gesammelt habe. Ich bin zuverlässig und genau, was für diese Aufgabe wichtig ist.\n\nIch bin gewohnt, selbstständig zu arbeiten und Verantwortung zu übernehmen. Ich denke, dass ich mich gut an die Anforderungen dieser Stelle anpassen kann. Ich bin körperlich fit und habe keine Probleme damit, im Stehen zu arbeiten oder Kisten zu heben und zu tragen.\n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar und würde mich freuen, wenn wir uns bei einem Gespräch unterhalten könnten, um zu sehen, ob ich zu Ihrem Team passe und ob ich langfristig bleiben und später gern mehr Stunden übernehmen kann.",
+ "mentions_degree": false,
+ "rewrite": "Ich interessiere mich für die Tätigkeit in der Warenannahme, weil ich bereits Erfahrungen mit Waren und Logistik gesammelt habe. Ich bin zuverlässig und genau, was wichtig ist, wenn man Waren annimmt und bearbeitet.\n\nIch bin es gewohnt, eigenverantwortlich zu arbeiten und ich denke, dass ich mich gut an die Anforderungen dieser Stelle anpassen kann. Ich bin körperlich fit und habe keine Probleme damit, im Stehen zu arbeiten oder Kisten zu heben und zu tragen.\n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar und würde mich freuen, wenn wir uns unterhalten könnten, um zu sehen, ob ich zu Ihrem Team passe und ob ich langfristig bleiben kann."
 }
