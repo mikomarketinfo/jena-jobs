@@ -1,0 +1,11 @@
+{
+ "check_wrong": "500",
+ "check_right": "500",
+ "letter_http": "500",
+ "words": 0,
+ "paragraphs": 0,
+ "has_description": null,
+ "placeholders": 0,
+ "error": "BRIDGE_PASSWORD не задан в настройках Worker",
+ "preview": ""
+}
