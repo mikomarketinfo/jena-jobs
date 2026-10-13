@@ -2,12 +2,12 @@
  "check_wrong": "401",
  "check_right": "200",
  "letter_http": "200",
- "words": 78,
+ "words": 95,
  "paragraphs": 3,
  "has_description": true,
  "placeholders": 1,
  "error": null,
- "letter": "Ich interessiere mich für die Stelle als Warenannahme bei Hertel Nordbayern GmbH, weil ich Erfahrung im Umgang mit Waren und im Einkauf habe. Ich kenne mich mit Wareneingang, Lagerorganisation und Versand aus.\n\nDabei habe ich gelernt, sorgfältig zu arbeiten und Abläufe zu organisieren. Ich bin zuverlässig und pünktlich, was wichtig für diese Stelle ist.\n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar und möchte langfristig bleiben. Ich wünsche mir ein Gespräch, um mehr über die Stelle zu erfahren.",
+ "letter": "Die Stelle als Warenannahme bei Hertel Nordbayern GmbH in Bobeck passt mir, weil ich Erfahrung im Umgang mit Waren und im Einkauf habe. Ich habe in meinem eigenen Unternehmen den internationalen Einkauf von Waren und die Logistik verantwortet.\n\nIch kenne Wareneingang, Lagerorganisation und Versand aus der Praxis meines Online-Handels. Ich bin es gewohnt, Abläufe zu organisieren und Aufgaben zuverlässig zu erledigen.\n\nIch bin langfristig bereit, in dieser Position zu bleiben und hoffe, später mehr Stunden übernehmen zu können. Ich bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar und freue mich darauf, mich bei einem Gespräch vorzustellen.",
  "mentions_degree": false,
- "rewrite": "Ich interessiere mich für die Stelle als Warenannahme bei Hertel Nordbayern GmbH, weil ich Erfahrung im Umgang mit Waren und im Einkauf habe. Ich kenne mich mit Wareneingang, Lagerorganisation und Versand aus.\n\nDabei habe ich gelernt, sorgfältig zu arbeiten und Abläufe zu organisieren. Ich bin zuverlässig und pünktlich, was wichtig für diese Stelle ist.\n\nIch bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar. Ich würde mich freuen, wenn wir uns unterhalten könnten, um mehr über die Stelle zu erfahren."
+ "rewrite": "Die Stelle als Warenannahme bei Hertel Nordbayern GmbH in Bobeck passt mir, weil ich Erfahrung im Umgang mit Waren und im Einkauf habe. Ich habe in meinem eigenen Unternehmen den internationalen Einkauf von Waren und die Logistik verantwortet.\n\nIn meinem Online-Handel habe ich gelernt, wie man Wareneingang, Lagerorganisation und Versand am besten handhabt. Dabei musste ich Abläufe organisieren und Aufgaben zuverlässig erledigen.\n\nIch bin langfristig bereit, in dieser Position zu bleiben und hoffe, später mehr Stunden übernehmen zu können. Ich bin [[ab sofort / ab TT.MM.JJJJ]] verfügbar. Ich freue mich darauf, mich bei einem Gespräch vorzustellen."
 }
