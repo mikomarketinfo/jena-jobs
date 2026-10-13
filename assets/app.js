@@ -68,14 +68,21 @@
     $("#presetHint").textContent = p ? p.hint : "";
   }
 
+  // ★ (3) — Quereinstieg / обучение на месте; ↗ (2) — моё направление; 0 — прочее
   function careerLevel(job) {
     const ck = state.profile.career_keywords || {};
     const text = lower(job.title + " " + (job.beruf || ""));
     const has = list => (list || []).some(k => hit(text, k));
-    if (has(ck.leitung)) return 3;
-    if (has(ck.sprungbrett)) return 2;
-    if (has(ck.einstieg_mit_perspektive)) return 1;
+    if (job.qe || has(ck.einstieg)) return 3;
+    if (has(ck.richtung)) return 2;
     return 0;
+  }
+
+  function isLead(job) {
+    const P = state.profile;
+    const t = lower(job.title);
+    if ((P.lead_override || []).some(k => hit(t, k))) return false;
+    return (P.lead_terms || []).some(k => hit(t, k));
   }
 
   // ------------------------------------------------------------------ filters UI
@@ -89,6 +96,7 @@
     $("#showAusbildung").checked = !!f.show_ausbildung;
     $("#careerOnly").checked = !!f.career_only;
     $("#qeOnly").checked = !!f.qe_only;
+    $("#noLead").checked = !!f.no_lead;
     $("#sort").value = f.sort || "career";
   }
 
@@ -104,6 +112,7 @@
       career_only: $("#careerOnly").checked,
       minijob_any: !!(state.filters && state.filters.minijob_any),
       qe_only: $("#qeOnly").checked,
+      no_lead: $("#noLead").checked,
       sort: $("#sort").value,
     };
   }
@@ -133,11 +142,12 @@
     if (!isAusb && !f.show_job) return false;
 
     const text = lower(job.title + " " + (job.beruf || ""));
-    const textAll = text + " " + lower(job.employer);
+
     if (state.q && !lower(job.title + " " + job.employer + " " + job.place).includes(lower(state.q))) return false;
     const mjFree = f.minijob_any && (job.wt || []).includes("mj");
     if (f.keywords.length && !mjFree && !f.keywords.some(k => hit(text, k))) return false;
-    if (f.exclude.some(k => hit(textAll, k))) return false;
+    if (f.exclude.some(k => hit(text, k))) return false;
+    if (f.no_lead && isLead(job)) return false;
     if (job.dist != null && job.dist > f.radius_km) return false;
 
     const wt = job.wt || [];
@@ -167,7 +177,7 @@
 
   // ------------------------------------------------------------------ render
   const WT_LABEL = { vz: "Vollzeit", tz: "Teilzeit", mj: "Minijob", snw: "Schicht/WE", praktikum: "Praktikum", ho: "Homeoffice" };
-  const LVL = { 3: ["★", "руководство", "lvl3"], 2: ["↗", "ступенька к руководству", "lvl2"], 1: ["→", "вход с перспективой", "lvl1"] };
+  const LVL = { 3: ["★", "Quereinstieg / обучение на месте", "lvl3"], 2: ["↗", "моё направление", "lvl2"] };
 
   function card(j) {
     const lvl = LVL[j._lvl];
@@ -315,7 +325,7 @@
       <ul class="wishes">${(P.wishes || []).map(w => `<li>${esc(w)}</li>`).join("")}</ul>
 
       <h3 class="ph">3. Сравнение направлений</h3>
-      <p class="muted">Оценки 1–5 — экспертная прикидка по твоему профилю. Итог учитывает веса: опыт и рост ×2, ИИ ×1,5, язык и доход ×1. Вакансии — сколько сейчас найдено в радиусе (нажми, чтобы открыть).</p>
+      <p class="muted">Оценки 1–5 — экспертная прикидка по твоему профилю. Итог учитывает веса: лёгкость входа ×2, доход ×1, остальное ×1,5. Вакансии — сколько сейчас найдено в радиусе (нажми, чтобы открыть).</p>
       <div class="tbl-wrap"><table class="matrix">
         <thead><tr><th>#</th><th>Направление</th>${crit.map(c => `<th>${esc(c.name)}</th>`).join("")}<th>Итог</th><th>Вакансий</th></tr></thead>
         <tbody>${dirs.map((d, i) => `
@@ -334,7 +344,7 @@
         <p><b>План A:</b> ${esc(dirs[0] ? dirs[0].name : "")}</p>
         <p><b>План B:</b> ${esc(dirs[1] ? dirs[1].name : "")}</p>
         <p><b>Старт сейчас:</b> миниджоб на складе или в сервисе — параллельно с планом A, чтобы быстрее получить немецкий стаж и доход.</p>
-        <p class="muted">Общее ядро твоих сильных сторон: <b>закупки + логистика + IT-системы</b>. Поэтому SAP в закупках и складе — точка, где всё сходится.</p>
+        <p class="muted">Общее ядро твоих сильных сторон: <b>закупки + логистика + IT-системы</b>. Входить — с начальной позиции, а SAP учить параллельно: так через 1–2 года можно перейти на уровень выше.</p>
       </div>
 
       ${sap ? `<h3 class="ph">5. Какой SAP выбрать</h3>
@@ -342,6 +352,7 @@
         <p class="sap-rec">Рекомендация: <b>${esc(sap.recommend)}</b></p>
         <p>${esc(sap.why)}</p>
         <div class="routes">${sap.routes.map(r => `<div class="route"><b>${esc(r.name)}</b><span class="muted">${esc(r.time)}</span><p>Для: ${esc(r.for)}</p><p class="muted">${esc(r.note)}</p></div>`).join("")}</div>
+        ${sap.free ? `<h4>Как учиться бесплатно</h4><div class="routes">${sap.free.map(r => `<div class="route"><b>${esc(r.name)}</b><p>${esc(r.what)}</p></div>`).join("")}</div>` : ""}
         <p class="muted">Не рекомендую: ${sap.avoid.map(a => `<b>${esc(a.name)}</b> — ${esc(a.why)}`).join("; ")}.</p>
       </div>` : ""}
 
@@ -429,7 +440,7 @@
     };
     ["#keywords", "#exclude"].forEach(s => $(s).addEventListener("change", onUserChange));
     $("#radius").addEventListener("input", onUserChange);
-    ["#showJob", "#showAusbildung", "#careerOnly", "#qeOnly", "#sort"].forEach(s => $(s).addEventListener("change", onUserChange));
+    ["#showJob", "#showAusbildung", "#careerOnly", "#qeOnly", "#noLead", "#sort"].forEach(s => $(s).addEventListener("change", onUserChange));
     $$("#worktime input").forEach(i => i.addEventListener("change", onUserChange));
     $$("#minijob button").forEach(b => b.onclick = () => {
       $$("#minijob button").forEach(x => x.classList.toggle("on", x === b)); onUserChange();
