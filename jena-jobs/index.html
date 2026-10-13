@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Работа и Ausbildung · Jena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div>
+      <h1>Работа и Ausbildung <span class="city">· Jena и округа</span></h1>
+      <p class="sub" id="meta">Загрузка данных…</p>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="new" role="tab">Новые <span class="cnt" id="cnt-new">0</span></button>
+      <button class="tab" data-tab="all" role="tab">Все остальные <span class="cnt" id="cnt-all">0</span></button>
+      <button class="tab" data-tab="test" role="tab">Тест профориентации</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ФИЛЬТРЫ -->
+  <section class="filters" id="filters">
+    <div class="filters-head">
+      <label class="default-toggle">
+        <input type="checkbox" id="useDefault">
+        <span>Мои стандартные фильтры</span>
+      </label>
+      <select id="defaultSource" title="Откуда брать стандартные фильтры">
+        <option value="profile">по моим целям</option>
+        <option value="test">по результату теста</option>
+      </select>
+      <input type="search" id="q" placeholder="Быстрый поиск по названию или фирме…">
+      <button class="ghost" id="toggleMore" aria-expanded="false">Все фильтры ▾</button>
+    </div>
+
+    <div class="filters-body" id="filtersBody" hidden>
+      <div class="frow">
+        <label class="fl">Ключевые слова <small>(через запятую; пусто = все)</small>
+          <textarea id="keywords" rows="2"></textarea>
+        </label>
+        <label class="fl">Исключить слова
+          <textarea id="exclude" rows="2"></textarea>
+        </label>
+      </div>
+      <div class="frow">
+        <label class="fl">Радиус: <b id="radiusVal">30</b> км
+          <input type="range" id="radius" min="5" max="50" step="5">
+        </label>
+        <div class="fl">Миниджоб
+          <div class="seg" id="minijob">
+            <button data-v="include">вместе с другими</button>
+            <button data-v="only">только миниджоб</button>
+            <button data-v="exclude">без миниджобов</button>
+          </div>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fl">Время работы
+          <div class="chips" id="worktime">
+            <label><input type="checkbox" value="vz"> Vollzeit</label>
+            <label><input type="checkbox" value="tz"> Teilzeit</label>
+            <label><input type="checkbox" value="snw"> Schicht / Wochenende</label>
+            <label><input type="checkbox" value="praktikum"> Praktikum / Trainee</label>
+            <label><input type="checkbox" value="unknown"> не указано</label>
+          </div>
+        </div>
+        <div class="fl">Показывать
+          <div class="chips">
+            <label><input type="checkbox" id="showJob"> Работа</label>
+            <label><input type="checkbox" id="showAusbildung"> Ausbildung</label>
+            <label><input type="checkbox" id="careerOnly"> только с перспективой роста</label>
+          </div>
+        </div>
+        <label class="fl">Сортировка
+          <select id="sort">
+            <option value="career">сначала с перспективой роста</option>
+            <option value="date">сначала новые</option>
+            <option value="dist">сначала ближе</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Фильтры сохраняются в этом браузере. Они сужают уже собранные вакансии; что собирать каждый день, задаётся в <code>config/search.json</code>.</p>
+    </div>
+  </section>
+
+  <!-- ВАКАНСИИ -->
+  <section id="view-jobs">
+    <div class="cols">
+      <div class="col" id="col-job">
+        <h2>Работа <span class="cnt" id="n-job">0</span></h2>
+        <div class="list" id="list-job"></div>
+      </div>
+      <div class="col" id="col-ausbildung">
+        <h2>Ausbildung <span class="cnt" id="n-ausbildung">0</span></h2>
+        <div class="list" id="list-ausbildung"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ТЕСТ -->
+  <section id="view-test" hidden>
+    <div class="test-card" id="testBox"></div>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  Нажми на вакансию — откроется страница биржи, где можно отправить заявку.
+  Звёздочка ★ — должность руководителя, ↗ — ступенька к руководству, → — вход в сферу, где рост реален.
+</footer>
+
+<script src="assets/test.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

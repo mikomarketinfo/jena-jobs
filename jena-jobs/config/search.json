@@ -1,0 +1,14 @@
+{
+  "_comment": "Что собирать каждый день. Фильтры на странице только сужают уже собранное. Пустой список 'keywords' = собирать ВСЕ вакансии в радиусе.",
+  "location": "Jena",
+  "center": { "lat": 50.9271, "lon": 11.5892 },
+  "radius_km": 30,
+  "new_days": 14,
+  "keywords": [],
+  "max_pages_per_query": 100,
+  "sources": {
+    "arbeitsagentur": true,
+    "adzuna": true,
+    "jooble": true
+  }
+}
