@@ -712,9 +712,9 @@
       ]
     },
     "intro": {
-      "job": "mit großem Interesse habe ich Ihre Stellenanzeige als {title} {source} gelesen. Die Aufgaben passen sehr gut zu meinen Erfahrungen, und ich möchte mich in Ihrem Unternehmen langfristig weiterentwickeln.",
-      "minijob": "mit großem Interesse habe ich Ihre Anzeige für einen Minijob als {title} {source} gelesen. Ich suche eine zuverlässige Tätigkeit, in der ich mich gut einarbeiten und meine Stunden später gern erhöhen kann.",
-      "ausbildung": "hiermit bewerbe ich mich um einen Ausbildungsplatz als {title} {source}. Ich möchte meine bisherigen Erfahrungen mit einem deutschen Berufsabschluss verbinden und mich in Ihrem Unternehmen langfristig entwickeln."
+      "job": "Ihre Anzeige für die Stelle als {title} {source} hat mich direkt angesprochen, weil die Aufgaben gut zu dem passen, was ich bisher gemacht habe. Ich möchte mich in Ihrem Unternehmen langfristig weiterentwickeln.",
+      "minijob": "ich habe Ihre Anzeige für den Minijob {title} {source} gesehen und möchte mich gern bewerben. Ich suche eine feste Nebentätigkeit, in die ich mich gut einarbeiten kann – und übernehme später gern auch mehr Stunden.",
+      "ausbildung": "ich möchte mich um einen Ausbildungsplatz als {title} {source} bewerben. Mein Ziel ist es, meine bisherigen Erfahrungen mit einem deutschen Berufsabschluss zu verbinden und mich bei Ihnen langfristig zu entwickeln."
     },
     "background": "Ich habe einen Master-Abschluss in Systemanalyse und einen Bachelor in Informatik. Acht Jahre lang war ich selbstständig im Online-Handel tätig und habe dabei den internationalen Einkauf von Waren aus Europa und Asien, die Logistik sowie die Kundenkommunikation verantwortet.",
     "blocks": {
@@ -742,6 +742,41 @@
       "team": "Ich arbeite zuverlässig, strukturiert und gern im Team.",
       "learning": "In neue Aufgaben arbeite ich mich schnell ein und lerne gern dazu.",
       "language": "[[Sprachkenntnisse, z. B. Deutsch B2, Englisch gut]]"
+    },
+    "simple_keywords": [
+      "Minijob",
+      "Mini-Job",
+      "Aushilfe",
+      "Helfer",
+      "Hilfskraft",
+      "Lagermitarbeiter",
+      "Lagerhelfer",
+      "Lagerarbeiter",
+      "Kommissionier",
+      "Warenannahme",
+      "Wareneingang",
+      "Warenverräum",
+      "Verlade",
+      "Versandmitarbeiter",
+      "Packer",
+      "Verpack",
+      "Produktionshelfer",
+      "Produktionsmitarbeiter",
+      "Mitarbeiter Produktion",
+      "Fahrer",
+      "Zusteller",
+      "Kurier",
+      "Inventur",
+      "Regal",
+      "Fahrgast",
+      "Servicekraft",
+      "Küchenhilfe",
+      "Spüler"
+    ],
+    "simple": {
+      "background": "Im Online-Handel habe ich über Jahre selbst Waren angenommen, geprüft, eingelagert, verpackt und verschickt. Sorgfältiges und zuverlässiges Arbeiten ist für mich selbstverständlich.",
+      "generic": "Ich arbeite gern praktisch, bin pünktlich und arbeite mich schnell in neue Abläufe ein.",
+      "language": "Ich spreche gut Deutsch (B2/C1)."
     }
   },
   "external_sites": [

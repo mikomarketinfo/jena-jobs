@@ -38,6 +38,25 @@ export default {
     if (!(await safeEqual(key, env.BRIDGE_PASSWORD))) return json({ error: "Неверный пароль" }, 401);
 
     if (url.pathname === "/check") return json({ ok: true });
+
+    // «Очеловечить»: переписать готовый текст естественнее, не меняя фактов
+    if (url.pathname === "/rewrite") {
+      let b; try { b = await request.json(); } catch { return json({ error: "bad json" }, 400); }
+      const text = String(b.text || "").slice(0, 6000);
+      if (!text.trim()) return json({ error: "Пустой текст" }, 400);
+      const sys = `Du überarbeitest den Haupttext eines deutschen Anschreibens, damit er natürlich und menschlich klingt.
+- Inhalt und Fakten bleiben gleich. Nichts hinzufügen, nichts erfinden.
+- Platzhalter in doppelten eckigen Klammern [[…]] unverändert übernehmen.
+- Absätze beibehalten (durch Leerzeilen getrennt). Keine Anrede, keine Grußformel.
+- Gib nur den überarbeiteten Text aus.
+` + (b.focus === "simple" ? "- Studienabschlüsse, Führungserfahrung und Selbstständigkeit entfernen, falls sie vorkommen — die Stelle ist eine einfache Tätigkeit.\n" : "") + "\n" + STYLE;
+      try {
+        const res = await env.AI.run(MODEL, { messages: [{ role: "system", content: sys }, { role: "user", content: text }], max_tokens: 1100, temperature: 0.8 });
+        const out = clean(res.response || "");
+        return out ? json({ text: out, model: MODEL }) : json({ error: "Пустой ответ модели" }, 502);
+      } catch (e) { return json({ error: "Ошибка ИИ: " + (e && e.message ? e.message : e) }, 502); }
+    }
+
     if (url.pathname !== "/letter") return json({ error: "not found" }, 404);
 
     let body;
@@ -48,13 +67,14 @@ export default {
     const description = job.ref ? await fetchDescription(job.ref) : "";
     const cv = String(body.cv || "").slice(0, MAX_CV);
 
+    const simple = body.focus === "simple";
     const messages = [
-      { role: "system", content: SYSTEM },
+      { role: "system", content: SYSTEM + "\n\n" + (simple ? FOCUS_SIMPLE : FOCUS_FULL) },
       { role: "user", content: userPrompt(job, description, cv, String(body.notes || "").slice(0, 1500)) },
     ];
 
     try {
-      const res = await env.AI.run(MODEL, { messages, max_tokens: 1100, temperature: 0.5 });
+      const res = await env.AI.run(MODEL, { messages, max_tokens: 1100, temperature: 0.7 });
       const text = clean(res.response || "");
       if (!text) return json({ error: "Пустой ответ модели" }, 502);
       return json({ text, model: MODEL, has_description: !!description });
@@ -64,20 +84,37 @@ export default {
   },
 };
 
+const STYLE = `Stil — der Text soll klingen wie von einem echten Menschen geschrieben, nicht wie von einer KI:
+- Einfache, klare Wörter. Kurze und mittellange Sätze abwechseln. Keine Schachtelsätze.
+- Konkret statt allgemein: lieber eine echte Tätigkeit aus dem Lebenslauf nennen als Eigenschaften aufzählen.
+- VERBOTEN sind diese typischen KI- und Bewerbungsfloskeln: "hiermit bewerbe ich mich", "mit großem Interesse", "Ich bin überzeugt, dass", "Darüber hinaus", "Zudem", "Des Weiteren", "leidenschaftlich", "dynamisch", "spannende Herausforderung", "wertvolle Erfahrungen", "ideale Kandidat", "bringe ich mit", "einen wertvollen Beitrag leisten", "teamfähig, belastbar und flexibel", "in einem dynamischen Umfeld", "meine Fähigkeiten einbringen".
+- Keine Superlative, keine Übertreibungen, keine Aufzählungen mit Spiegelstrichen.
+- Höchstens ein Satz über Motivation — ehrlich und bodenständig (z. B. warum genau diese Arbeit gerade passt).
+- Ich-Form, freundlich, sachlich, Niveau B2–C1 — so, wie ein Bewerber mit gutem, aber nicht perfektem Deutsch schreiben würde.`;
+
 const SYSTEM = `Du bist ein erfahrener deutscher Bewerbungsberater. Du schreibst den Hauptteil eines Anschreibens auf Deutsch.
 
 Regeln:
 - Schreibe NUR den Haupttext: keine Adressen, kein Datum, keinen Betreff, keine Anrede ("Sehr geehrte …") und keine Grußformel ("Mit freundlichen Grüßen").
-- 4 bis 5 Absätze, insgesamt 220–320 Wörter. Absätze durch eine Leerzeile trennen.
+- Absätze durch eine Leerzeile trennen.
 - Verwende ausschließlich Fakten aus dem Lebenslauf und den Notizen. Erfinde nichts: keine Firmennamen, Zahlen, Zertifikate oder Kenntnisse, die nicht genannt sind.
-- Wenn eine wichtige Angabe fehlt (z. B. Eintrittstermin, Arbeitszeiten, Gehaltswunsch nur falls in der Anzeige verlangt), setze einen Platzhalter in doppelten eckigen Klammern, z. B. [[ab sofort / ab TT.MM.JJJJ]].
-- Beziehe dich konkret auf die Aufgaben und Anforderungen der Stelle und zeige, welche Erfahrungen dazu passen.
-- Wenn die Erfahrung nicht exakt passt: betone Lernbereitschaft, schnelle Einarbeitung und übertragbare Erfahrungen — ehrlich, ohne Übertreibung.
-- Keine Floskeln wie "hiermit bewerbe ich mich", "mit großem Interesse", "ich bin teamfähig, belastbar und flexibel". Natürlicher, klarer Stil, aktive Sätze, Sprachniveau B2–C1 (glaubwürdig für den Bewerber).
-- Erster Absatz: Bezug auf die konkrete Stelle und warum sie passt. Letzter Absatz: Verfügbarkeit und Wunsch nach einem persönlichen Gespräch.
-- Formuliere selbstbewusst und positiv. Beginne NIE mit Einschränkungen oder Schwächen ("passt nicht direkt", "obwohl ich keine Erfahrung habe", "trotzdem"). Zeige zuerst, welche Erfahrungen zur Stelle passen; Lernbereitschaft erst danach und nur kurz.
-- Der erste Satz muss konkret sein (was reizt an genau dieser Stelle oder diesem Arbeitgeber + welche eigene Erfahrung dazu passt).
-- Gib nur den Text aus, ohne Überschrift und ohne Erklärungen.`;
+- RELEVANZ: Nenne nur Erfahrungen und Qualifikationen, die für genau diese Stelle nützlich sind. Alles andere weglassen — auch wenn es im Lebenslauf steht.
+- Wenn eine wichtige Angabe fehlt (z. B. Eintrittstermin oder Arbeitszeiten), setze einen Platzhalter in doppelten eckigen Klammern, z. B. [[ab sofort / ab TT.MM.JJJJ]].
+- Beziehe dich konkret auf die Aufgaben der Stelle und zeige, welche Erfahrungen dazu passen.
+- Beginne nie mit Einschränkungen oder Schwächen. Zeige zuerst, was passt; Lernbereitschaft danach und kurz.
+- Letzter Absatz: Verfügbarkeit und Wunsch nach einem Gespräch, in einem natürlichen Satz.
+- Gib nur den Text aus, ohne Überschrift und ohne Erklärungen.
+
+` + STYLE;
+
+// Einfache Tätigkeit / Minijob: keine Überqualifikation zeigen
+const FOCUS_SIMPLE = `WICHTIG — einfache Tätigkeit bzw. Minijob:
+- Erwähne KEINE Studienabschlüsse (Master, Bachelor, Studium), KEINE Führungserfahrung, KEINE Programmierkenntnisse und KEINE Selbstständigkeit als Unternehmer — das wirkt überqualifiziert und schreckt ab.
+- Erwähne nur praktische, passende Erfahrung (z. B. Umgang mit Waren, Wareneingang, Verpacken, Versand, Kundenkontakt), Zuverlässigkeit, Pünktlichkeit, sorgfältiges Arbeiten, zeitliche Verfügbarkeit.
+- Bei Minijob: kurz erwähnen, dass man langfristig bleiben und später gern mehr Stunden übernehmen möchte.
+- Kurz halten: 3 Absätze, insgesamt 110–170 Wörter.`;
+
+const FOCUS_FULL = `Länge: 4 Absätze, insgesamt 200–300 Wörter. Qualifikationen nur nennen, wenn sie zur Stelle passen.`;
 
 function userPrompt(job, description, cv, notes) {
   const kind = job.type === "ausbildung" ? "Ausbildungsplatz" : job.minijob ? "Minijob" : "Stelle";

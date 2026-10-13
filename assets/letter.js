@@ -117,6 +117,16 @@ window.LETTER = (function () {
     return "generic";
   }
 
+  // простая работа / миниджоб → без дипломов и руководства в письме
+  function isSimpleJob(j) {
+    if ((j.wt || []).includes("mj")) return true;
+    const t = lower(j.title + " " + (j.beruf || ""));
+    return (cfg.simple_keywords || []).some(k => t.includes(lower(k)));
+  }
+  const simpleOn = () => { const c = root && $("#lt-simple", root); return c ? c.checked : isSimpleJob(job); };
+  // для миниджоба убираем слово «Minijob» из названия, чтобы не было «Minijob als Minijob …»
+  const mjTitle = t => t.replace(/\bmini-?\s*\/\s*/gi, " ").replace(/\b(mini-?job|nebenjob|minijobber(?:in)?|538\s*€?(?:-?basis)?|auf\s+minijob-?basis)\b[:\s-]*/gi, " ").replace(/\(\s*\)/g, "").replace(/^[^\p{L}\d]+|[\s:–\/-]+$/gu, "").replace(/\s+/g, " ").trim();
+
   const cleanTitle = t => (t || "").replace(/\s*\((?:m|w|d|f|x|div)\s*[/|,]\s*(?:m|w|d|f|x)(?:\s*[/|,]\s*(?:m|w|d|f|x))?\)\s*/gi, " ")
     .replace(/\s*[mwd]\/[mwd]\/[mwd]\s*/gi, " ").replace(/^\d{4}\s*/, "").replace(/\s+/g, " ").trim();
 
@@ -131,7 +141,9 @@ window.LETTER = (function () {
     const isMj = (j.wt || []).includes("mj");
     const kind = j.type === "ausbildung" ? "ausbildung" : isMj ? "minijob" : "job";
     const cat = category(j);
-    const title = cleanTitle(j.title);
+    const title0 = cleanTitle(j.title);
+    const title = kind === "minijob" ? (mjTitle(title0) || title0) : title0;
+    const simple = simpleOn();
     const ref = j.id && j.id.startsWith("ba:") ? j.id.slice(3) : "";
     const source = j.src && j.src.startsWith("Arbeitsagentur") ? "in der Jobbörse der Bundesagentur für Arbeit" : (j.src ? `auf ${j.src.split(" /")[0]}` : "");
     const v = k => (me[k] && me[k].trim()) ? me[k].trim() : todo(FIELDS.find(f => f[0] === k)[2]);
@@ -149,6 +161,15 @@ window.LETTER = (function () {
       body.push(me.summary && me.summary.trim() ? me.summary.trim() : O.block);
       body.push(O.team + " " + O.learning);
       body.push((me.languages && me.languages.trim() ? me.languages.trim() : O.language) + " " + (cfg.availability[kind] || cfg.availability.job));
+      if (me.extra && me.extra.trim()) body.push(me.extra.trim());
+      body.push(cfg.closing);
+      return frame(body);
+    }
+    if (simple && kind !== "ausbildung") {
+      const S = cfg.simple || {};
+      body.push(cat === "lager" || cat === "generic" ? S.background : (cfg.blocks[cat] || S.generic));
+      body.push(S.generic);
+      body.push(S.language + " " + (cfg.availability[kind] || cfg.availability.job));
       if (me.extra && me.extra.trim()) body.push(me.extra.trim());
       body.push(cfg.closing);
       return frame(body);
@@ -172,9 +193,9 @@ window.LETTER = (function () {
       { t: [v("name"), v("street"), v("city"), v("phone"), v("email")].join("\n"), cls: "sender" },
       { t: [j.employer || todo("Firma"), todo("Ansprechpartner/in (falls bekannt)"), todo("Straße Hausnummer"), place ? place : todo("PLZ Ort")].join("\n"), cls: "recipient" },
       { t: `${myCity}, ${today}`, a: "right" },
-      { t: `Bewerbung ${kind === "ausbildung" ? "um einen Ausbildungsplatz als" : "als"} ${title}${ref ? ` – Referenznummer ${ref}` : ""}`, cls: "subject" },
+      { t: `Bewerbung ${kind === "ausbildung" ? "um einen Ausbildungsplatz als " + title : kind === "minijob" ? "für den Minijob: " + title : "als " + title}${ref ? ` – Referenznummer ${ref}` : ""}`, cls: "subject" },
       { t: `Sehr geehrte Damen und Herren, ${todo("besser: Sehr geehrte/r Frau/Herr Name — wenn Ansprechpartner bekannt")}` },
-      ...body.map(t => ({ t })),
+      ...body.map(t => ({ t, cls: "body" })),
       { t: `Mit freundlichen Grüßen\n\n\n${v("name")}` },
       { t: cfg.attachments, cls: "small" },
     ];
@@ -302,7 +323,7 @@ window.LETTER = (function () {
         body: JSON.stringify({
           job: { title: cleanTitle(job.title), employer: job.employer, place: job.place, beruf: job.beruf, type: job.type,
             minijob: (job.wt || []).includes("mj"), qe: !!job.qe, ref: job.id && job.id.startsWith("ba:") ? job.id.slice(3) : "" },
-          cv, notes: me.extra || "",
+          cv, notes: me.extra || "", focus: simpleOn() ? "simple" : "full",
         }),
       });
       const d = await r.json().catch(() => ({}));
@@ -315,6 +336,33 @@ window.LETTER = (function () {
     } finally {
       btn.disabled = false; btn.textContent = "✨ Написать с ИИ";
     }
+  }
+
+  // «Сделать живее»: переписать основной текст письма естественнее (факты и пропуски сохраняются)
+  async function aiHumanize() {
+    const url = bridgeUrl(), key = LS.get("bridgeKey", "");
+    if (!url || !key) { toggleAISettings(true); setAIStatus("Укажи адрес моста и пароль.", "err"); return; }
+    const ed = $("#lt-editor", root);
+    let bodyEls = $$("p.body", ed);
+    if (!bodyEls.length) { setAIStatus("Не нашёл основной текст письма — создай письмо заново.", "err"); return; }
+    const text = bodyEls.map(p => p.innerText.trim()).filter(Boolean).join("\n\n");
+    const btn = $("#lt-human", root); btn.disabled = true; btn.textContent = "Переписываю…";
+    try {
+      const r = await fetch(url + "/rewrite", {
+        method: "POST", headers: { "Content-Type": "application/json", "X-Bridge-Key": key },
+        body: JSON.stringify({ text, focus: simpleOn() ? "simple" : "full" }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+      const paras = d.text.split(/\n\s*\n/).map(x => x.replace(/\s*\n\s*/g, " ").trim()).filter(Boolean);
+      // старые текстовые [Hinweis] снова превращаем в [[Hinweis]], чтобы они подсветились
+      const html = paras.map(t => `<p class="body">${marks(t.replace(/(^|[^\[])\[([^\[\]]+)\](?!\])/g, "$1[[$2]]"))}</p>`).join("");
+      bodyEls[0].insertAdjacentHTML("beforebegin", html);
+      bodyEls.forEach(p => p.remove());
+      afterEdit();
+      setAIStatus("Текст переписан. Если вариант не понравился — нажми ещё раз или создай письмо заново.", "ok");
+    } catch (e) { setAIStatus("Ошибка: " + e.message, "err"); }
+    finally { btn.disabled = false; btn.textContent = "🙂 Сделать живее"; }
   }
 
   async function aiCheck() {
@@ -419,12 +467,16 @@ window.LETTER = (function () {
           <section class="lt-result">
             <div class="lt-tools">
               <button class="primary" id="lt-ai">✨ Написать с ИИ</button>
+              <button class="ghost" id="lt-human" title="Переписать основной текст естественнее, без заученных фраз">🙂 Сделать живее</button>
               <button class="ghost" id="lt-aicfg" title="Настройки моста ИИ">⚙</button>
               <span class="lt-count" id="lt-count"></span>
               <button class="ghost" id="lt-next">К следующему пропуску</button>
               <button class="ghost" id="lt-pdf">Сохранить PDF</button>
               <button class="ghost" id="lt-docx">Сохранить Word</button>
             </div>
+            <label class="lt-simple" title="Для простой работы и миниджобов: не упоминать дипломы, руководство и IT — только то, что относится к работе">
+              <input type="checkbox" id="lt-simple"> Только релевантное о себе (без дипломов и руководства)
+            </label>
             <div class="lt-aiset" id="lt-aiset" hidden>
               <label class="fl">Адрес моста<input id="lt-burl" placeholder="https://round-forest-2940….workers.dev"></label>
               <label class="fl">Пароль моста<input id="lt-bkey" type="password" autocomplete="off"></label>
@@ -448,6 +500,8 @@ window.LETTER = (function () {
     };
     $("#lt-next", root).onclick = nextMark;
     $("#lt-ai", root).onclick = aiWrite;
+    $("#lt-human", root).onclick = aiHumanize;
+    $("#lt-simple", root).onchange = () => setAIStatus("Нажми «Создать заново» или «✨ Написать с ИИ», чтобы применить.", "");
     $("#lt-aicfg", root).onclick = () => toggleAISettings();
     $("#lt-bcheck", root).onclick = aiCheck;
     $("#lt-pdf", root).onclick = () => savePDF().catch(err => alert(err.message));
@@ -501,6 +555,8 @@ window.LETTER = (function () {
     ensureRoot();
     const me = current();
     $("#lt-job", root).textContent = `${cleanTitle(j.title)} · ${j.employer || ""}`;
+    $("#lt-simple", root).checked = isSimpleJob(j);
+    setAIStatus(isSimpleJob(j) ? "Простая работа: в письме только то, что к ней относится (галочку можно снять)." : "");
     loadLetter();
     // если данных ещё нет — раскрываем блок данных, иначе сворачиваем на телефоне
     $("#lt-datawrap", root).open = !me.name || window.innerWidth > 900;

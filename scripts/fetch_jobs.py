@@ -341,45 +341,57 @@ def fetch_adzuna(cfg):
 
 # ------------------------------------------------------------------------ Jooble
 def fetch_jooble(cfg):
+    """Jooble: у ключа ограниченное число запросов (по умолчанию 500), поэтому
+    делаем максимум jooble.max_requests_per_run запросов в день по точечным запросам
+    и ведём счётчик в meta.jooble_used."""
     key = os.getenv("JOOBLE_KEY")
     if not key:
         raise LookupError("нет ключа (JOOBLE_KEY)")
+    jc = cfg.get("jooble") or {}
+    budget_total = int(jc.get("total_limit", 500))
+    used = int(cfg.get("_jooble_used", 0))
+    per_run = min(int(jc.get("max_requests_per_run", 5)), max(0, budget_total - used - int(jc.get("reserve", 20))))
+    if per_run <= 0:
+        raise LookupError(f"лимит запросов исчерпан ({used}/{budget_total})")
+    queries = jc.get("queries") or ["Quereinsteiger", "Lager", "Einkauf", "Minijob", "Ausbildung"]
     radii = [0, 4, 8, 16, 26, 40, 80]
     radius = next((r for r in radii if r >= cfg["radius_km"]), 80)
-    kws = cfg.get("keywords") or ["", "Ausbildung", "Minijob"]
-    jobs, complete = {}, True
-    for kw in kws:
-        page = 1
-        while True:
-            res = http_json(f"https://de.jooble.org/api/{key}",
-                            data={"keywords": kw, "location": cfg["location"], "radius": str(radius), "page": str(page)})
-            items = res.get("jobs") or []
-            for it in items:
-                title = it.get("title") or ""
-                snippet = re.sub(r"<[^>]+>", " ", it.get("snippet") or "")
-                jtype, wt = classify(title, snippet + " " + (it.get("type") or ""))
-                t = (it.get("type") or "").lower()
-                if "vollzeit" in t or "full" in t:
-                    wt.append("vz")
-                if "teilzeit" in t or "part" in t:
-                    wt.append("tz")
-                jid = f"joo:{it.get('id')}"
-                jobs[jid] = {
-                    "id": jid, "src": "Jooble" + (f" / {it['source']}" if it.get("source") else ""),
-                    "title": title, "beruf": "", "employer": it.get("company") or "",
-                    "place": it.get("location") or "", "lat": None, "lon": None,
-                    "type": jtype, "wt": sorted(set(wt)), "published": (it.get("updated") or "")[:10] or None,
-                    "start": None, "url": it.get("link"), "ext": None,
-                }
-            total = int(res.get("totalCount") or 0)
-            if not items or len(jobs) >= total or page * 20 >= total:
-                break
-            page += 1
-            if page > cfg.get("max_pages_per_query", 40):
-                complete = False
-                break
-            time.sleep(0.5)
-    return list(jobs.values()), complete
+    jobs, made = {}, 0
+    for kw in queries:
+        if made >= per_run:
+            break
+        res = http_json(f"https://de.jooble.org/api/{key}",
+                        data={"keywords": kw, "location": cfg["location"], "radius": str(radius),
+                              "page": "1", "ResultOnPage": str(jc.get("results_per_query", 50))})
+        made += 1
+        for it in res.get("jobs") or []:
+            title = it.get("title") or ""
+            snippet = re.sub(r"<[^>]+>", " ", it.get("snippet") or "")
+            jtype, wt = classify(title, snippet + " " + (it.get("type") or ""))
+            t = (it.get("type") or "").lower()
+            if "vollzeit" in t or "full" in t:
+                wt.append("vz")
+            if "teilzeit" in t or "part" in t:
+                wt.append("tz")
+            if re.search(r"quereinst", title + " " + snippet, re.I):
+                qe = True
+            else:
+                qe = False
+            jid = f"joo:{it.get('id')}"
+            jobs[jid] = {
+                "id": jid, "src": "Jooble" + (f" / {it['source']}" if it.get("source") else ""),
+                "title": re.sub(r"\s+", " ", title).strip(), "beruf": "", "employer": it.get("company") or "",
+                "place": it.get("location") or "", "lat": None, "lon": None,
+                "type": jtype, "wt": sorted(set(wt)), "published": (it.get("updated") or "")[:10] or None,
+                "start": None, "url": it.get("link"), "ext": None,
+            }
+            if qe:
+                jobs[jid]["qe"] = True
+        time.sleep(0.5)
+    cfg["_jooble_used"] = used + made
+    log(f"Jooble: {made} запросов, всего использовано {used + made}/{budget_total}")
+    # выборка точечная, поэтому «полной» она не считается: истекшие уйдут по правилу 7 дней
+    return list(jobs.values()), False
 
 
 SOURCES = {
@@ -458,6 +470,7 @@ def merge(old: dict, fetched: dict[str, tuple[list, bool]], cfg) -> dict:
 def main():
     cfg = json.loads(CONFIG.read_text(encoding="utf-8"))
     old = json.loads(DATA.read_text(encoding="utf-8")) if DATA.exists() else {}
+    cfg["_jooble_used"] = int((old.get("meta") or {}).get("jooble_used", 0))
 
     fetched, status = {}, {}
     for key, (family, fn) in SOURCES.items():
@@ -490,6 +503,7 @@ def main():
             "location": cfg["location"], "radius_km": cfg["radius_km"], "new_days": cfg.get("new_days", 14),
             "center": cfg.get("center"), "sources": status, "removed_today": merged["removed_today"],
             "api_debug": API_DEBUG[:12],
+            "jooble_used": cfg.get("_jooble_used", 0),
         },
         "jobs": merged["jobs"],
     }

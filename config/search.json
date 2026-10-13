@@ -13,5 +13,19 @@
     "arbeitsagentur": true,
     "adzuna": false,
     "jooble": true
+  },
+  "jooble": {
+    "_comment": "У ключа Jooble ~500 запросов. 5 в день ≈ 3 месяца. total_limit можно поднять, если Jooble увеличит лимит.",
+    "total_limit": 500,
+    "reserve": 20,
+    "max_requests_per_run": 5,
+    "results_per_query": 50,
+    "queries": [
+      "Quereinsteiger",
+      "Lager",
+      "Einkauf",
+      "Minijob",
+      "Ausbildung"
+    ]
   }
 }

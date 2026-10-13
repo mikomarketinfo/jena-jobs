@@ -205,3 +205,5 @@ body.lt-open { overflow: hidden; }
 .lt-aistatus.ok { color: var(--accent); }
 .lt-aistatus.err { color: #c0392b; }
 #lt-ai:disabled { opacity: .6; cursor: wait; }
+.lt-simple { display: flex; gap: 8px; align-items: center; font-size: 13.5px; font-weight: 600; cursor: pointer; }
+.lt-simple input { width: 17px; height: 17px; accent-color: var(--accent); }
