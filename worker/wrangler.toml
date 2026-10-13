@@ -7,6 +7,10 @@ workers_dev = true
 [ai]
 binding = "AI"
 
+[[kv_namespaces]]
+binding = "STORE"
+id = "92d6ee10c4b742df89ba1659f4d30f5c"
+
 [vars]
 # откуда разрешены запросы (через запятую)
 ALLOWED_ORIGINS = "https://mikomarketinfo.github.io"

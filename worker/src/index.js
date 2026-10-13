@@ -12,6 +12,15 @@
 const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const MAX_CV = 7000;
 const MAX_DESC = 4000;
+const JOOBLE_LIMIT = 500;
+const JOOBLE_USED_BEFORE = 7; // запросы, потраченные на тесты до хранилища
+
+async function loadJooble(env) {
+  if (!env.STORE) return { jobs: [], used: JOOBLE_USED_BEFORE, updated: null };
+  const raw = await env.STORE.get("jooble", "json");
+  return raw || { jobs: [], used: JOOBLE_USED_BEFORE, updated: null };
+}
+async function saveJooble(env, st) { if (env.STORE) await env.STORE.put("jooble", JSON.stringify(st)); }
 
 export default {
   async fetch(request, env) {
@@ -19,7 +28,7 @@ export default {
     const allowed = (env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
     const cors = {
       "Access-Control-Allow-Origin": allowed.includes(origin) ? origin : (allowed[0] || "*"),
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, X-Bridge-Key",
       "Access-Control-Max-Age": "86400",
       "Vary": "Origin",
@@ -30,6 +39,10 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/") return json({ ok: true, service: "jena-jobs bridge" });
+    if (request.method === "GET" && url.pathname === "/jooble/data") {
+      const st = await loadJooble(env);
+      return json({ jobs: st.jobs, used: st.used, limit: JOOBLE_LIMIT, updated: st.updated, has_key: !!env.JOOBLE_KEY });
+    }
     if (request.method !== "POST") return json({ error: "method" }, 405);
 
     // --- пароль
@@ -38,6 +51,57 @@ export default {
     if (!(await safeEqual(key, env.BRIDGE_PASSWORD))) return json({ error: "Неверный пароль" }, 401);
 
     if (url.pathname === "/check") return json({ ok: true });
+
+    // Jooble по кнопке: 1 запрос → новые вакансии добавляются в хранилище (KV)
+    if (url.pathname === "/jooble/refresh") {
+      if (!env.JOOBLE_KEY) return json({ error: "Ключ Jooble не задан в Worker (секрет JOOBLE_KEY)" }, 500);
+      if (!env.STORE) return json({ error: "Хранилище KV не подключено" }, 500);
+      let b = {}; try { b = await request.json(); } catch { /* пусто — общий запрос */ }
+      const st = await loadJooble(env);
+      if (st.used >= JOOBLE_LIMIT - 5) return json({ error: `Лимит Jooble почти исчерпан (${st.used}/${JOOBLE_LIMIT})` }, 429);
+      const payload = { keywords: String(b.keywords || "").slice(0, 80), location: String(b.location || "Jena"),
+        radius: String(b.radius || 26), page: "1", ResultOnPage: String(b.per_page || 100) };
+      let res = null, lastErr = "";
+      for (const host of ["https://de.jooble.org", "https://jooble.org"]) {
+        try {
+          const r = await fetch(`${host}/api/${env.JOOBLE_KEY}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+          if (!r.ok) { lastErr = `${host}: HTTP ${r.status}`; continue; }
+          res = await r.json(); res._host = host; break;
+        } catch (e) { lastErr = `${host}: ${e.message}`; }
+      }
+      st.used += 1;
+      if (!res) { await saveJooble(env, st); return json({ error: "Jooble не ответил: " + lastErr, used: st.used }, 502); }
+      const today = new Date().toISOString().slice(0, 10);
+      const map = new Map(st.jobs.map(j => [j.id, j]));
+      let added = 0;
+      for (const it of res.jobs || []) {
+        const id = "joo:" + it.id;
+        const prev = map.get(id);
+        const title = String(it.title || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+        const snippet = String(it.snippet || "").replace(/<[^>]+>/g, " ");
+        const type = String(it.type || "").toLowerCase();
+        const wt = [];
+        if (/vollzeit|full/.test(type)) wt.push("vz");
+        if (/teilzeit|part/.test(type)) wt.push("tz");
+        if (/mini-?job|geringf[üu]gig|\b5\d\d\s?(€|euro)/i.test(title + " " + snippet)) wt.push("mj");
+        if (/praktikum|werkstudent/i.test(title)) wt.push("praktikum");
+        map.set(id, {
+          id, src: "Jooble" + (it.source ? " / " + it.source : ""), title, beruf: "", employer: it.company || "",
+          place: it.location || "", lat: null, lon: null, dist: null,
+          type: /ausbildung|azubi|auszubildende|duales studium/i.test(title) ? "ausbildung" : "job",
+          wt, qe: /quereinst/i.test(title + " " + snippet) || undefined,
+          published: String(it.updated || "").slice(0, 10) || null, start: null, url: it.link,
+          first_seen: prev ? prev.first_seen : today, last_seen: today,
+        });
+        if (!prev) added++;
+      }
+      // старше 30 дней без подтверждения — удаляем
+      const cutoff = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
+      st.jobs = [...map.values()].filter(j => j.last_seen >= cutoff);
+      st.updated = new Date().toISOString();
+      await saveJooble(env, st);
+      return json({ ok: true, added, received: (res.jobs || []).length, total_found: res.totalCount, stored: st.jobs.length, used: st.used, limit: JOOBLE_LIMIT, host: res._host });
+    }
 
     // «Очеловечить»: переписать готовый текст естественнее, не меняя фактов
     if (url.pathname === "/rewrite") {

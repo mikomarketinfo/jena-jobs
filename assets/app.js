@@ -87,6 +87,52 @@
     return s.split(" /")[0] || "—";
   }
 
+  // ---------------------------------------------------------------- Jooble (хранится в мосте, обновляется по кнопке)
+  const bridge = () => (LS.get("bridgeUrl", "") || window.__BRIDGE_URL || "").replace(/\/+$/, "");
+  const normKey = j => lower(j.title).replace(/\(.*?\)|[^a-zäöüß0-9]+/g, "") + "|" + lower(j.employer).replace(/[^a-zäöüß0-9]+/g, "");
+  state.jooble = { used: null, limit: 500, updated: null };
+
+  async function loadJooble() {
+    const url = bridge(); if (!url) return;
+    try {
+      const r = await fetch(url + "/jooble/data", { cache: "no-store" });
+      if (!r.ok) return;
+      const d = await r.json();
+      state.jooble = { used: d.used, limit: d.limit, updated: d.updated, has_key: d.has_key };
+      const have = new Set(state.data.jobs.filter(j => !j.id.startsWith("joo:")).map(normKey));
+      state.data.jobs = state.data.jobs.filter(j => !j.id.startsWith("joo:"))
+        .concat((d.jobs || []).filter(j => !have.has(normKey(j))));
+      renderSources(); resetLimits(); render();
+    } catch { /* мост недоступен — показываем только основные данные */ }
+  }
+
+  async function refreshJooble() {
+    const url = bridge();
+    let key = LS.get("bridgeKey", "");
+    if (!url) { alert("Мост ещё не загрузился, попробуй через пару секунд."); return; }
+    if (!key) {
+      key = (prompt("Пароль моста (тот же, что для ИИ в Anschreiben):") || "").trim();
+      if (!key) return;
+      LS.set("bridgeKey", key);
+    }
+    const left = state.jooble.used != null ? state.jooble.limit - state.jooble.used : "?";
+    const kw = state.q || "";
+    if (!confirm(`Запросить свежие вакансии Jooble${kw ? ` по слову «${kw}»` : " (все в радиусе Jena)"}?\nБудет использован 1 запрос, осталось: ${left}.`)) return;
+    const btn = $("#joobleBtn"); btn.disabled = true; btn.textContent = "Загружаю…";
+    try {
+      const r = await fetch(url + "/jooble/refresh", {
+        method: "POST", headers: { "Content-Type": "application/json", "X-Bridge-Key": key },
+        body: JSON.stringify({ keywords: kw, location: (state.data.meta && state.data.meta.location) || "Jena", radius: 26, per_page: 100 }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 401) LS.set("bridgeKey", "");
+      if (!r.ok) throw new Error(d.error || ("HTTP " + r.status));
+      await loadJooble();
+      alert(`Jooble: получено ${d.received}, новых ${d.added}. Всего сохранено: ${d.stored}. Осталось запросов: ${d.limit - d.used}.`);
+    } catch (e) { alert("Jooble: " + e.message); }
+    finally { renderSources(); }
+  }
+
   function renderSources() {
     const counts = {};
     state.data.jobs.forEach(j => { const n = srcName(j); counts[n] = (counts[n] || 0) + 1; });
@@ -95,7 +141,11 @@
     const chips = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) =>
       `<button class="src-chip ${state.sourcesOff.includes(n) ? "" : "on"}" data-src="${esc(n)}" aria-pressed="${!state.sourcesOff.includes(n)}">${esc(n)} <span>${c}</span></button>`).join("") +
       inactive.map(([n, note]) => `<button class="src-chip off" disabled title="${esc(note)} — см. README, раздел «Подключить больше бирж»">${esc(n)} <span>нет ключа</span></button>`).join("");
-    $("#sources").innerHTML = chips;
+    const j = state.jooble || {};
+    const left = j.used != null ? j.limit - j.used : null;
+    const upd = j.updated ? new Date(j.updated).toLocaleDateString("ru-RU") : "ещё не загружали";
+    $("#sources").innerHTML = chips + (bridge() ? `<button class="src-chip jooble-btn" id="joobleBtn" title="Jooble собирает вакансии со StepStone, Indeed и других сайтов. Обновление: ${esc(upd)}">↻ Jooble · 1 запрос${left != null ? ` · осталось ${left}` : ""}</button>` : "");
+    const jb = $("#joobleBtn"); if (jb) jb.onclick = refreshJooble;
     $$("#sources .src-chip[data-src]").forEach(b => b.onclick = () => {
       const n = b.dataset.src;
       state.sourcesOff = state.sourcesOff.includes(n) ? state.sourcesOff.filter(x => x !== n) : [...state.sourcesOff, n];
@@ -459,7 +509,8 @@
     state.data = data;
     if (profile) state.profile = profile;
     window.__PROFILE = state.profile;
-    fetch("config/bridge.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(b => { if (b && b.url) window.__BRIDGE_URL = b.url; }).catch(() => {});
+    fetch("config/bridge.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null)
+      .then(b => { if (b && b.url) { window.__BRIDGE_URL = b.url; loadJooble(); } }).catch(() => {});
 
     $("#defaultSource").value = LS.get("defaultSource", LS.get("testResult", null) ? "test" : "profile");
     const useDefault = LS.get("useDefault", true);

@@ -1,0 +1,29 @@
+name: Jooble — обновить (1 запрос)
+
+on:
+  workflow_dispatch:
+    inputs:
+      keywords:
+        description: "Ключевое слово (пусто = все вакансии в радиусе)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Запрос через мост
+        env:
+          KEY: ${{ secrets.BRIDGE_PASSWORD }}
+          KW: ${{ github.event.inputs.keywords }}
+        run: |
+          URL=$(python3 -c "import json;print(json.load(open('config/bridge.json'))['url'])")
+          BODY=$(KW="$KW" python3 -c "import json,os;print(json.dumps({'keywords':os.environ.get('KW',''),'location':'Jena','radius':26,'per_page':100}))")
+          curl -s -m 60 -X POST -H "X-Bridge-Key: $KEY" -H "Content-Type: application/json" -d "$BODY" "$URL/jooble/refresh" > data/jooble_last.json || true
+          cat data/jooble_last.json
+          git config user.name "jobs-bot"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/jooble_last.json && git commit -m "Jooble: обновление" && git pull --rebase -q origin main && git push || true
