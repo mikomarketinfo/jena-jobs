@@ -459,6 +459,7 @@
     state.data = data;
     if (profile) state.profile = profile;
     window.__PROFILE = state.profile;
+    fetch("config/bridge.json", { cache: "no-store" }).then(r => r.ok ? r.json() : null).then(b => { if (b && b.url) window.__BRIDGE_URL = b.url; }).catch(() => {});
 
     $("#defaultSource").value = LS.get("defaultSource", LS.get("testResult", null) ? "test" : "profile");
     const useDefault = LS.get("useDefault", true);

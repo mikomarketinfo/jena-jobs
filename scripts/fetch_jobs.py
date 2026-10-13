@@ -351,7 +351,7 @@ def fetch_jooble(cfg):
     for kw in kws:
         page = 1
         while True:
-            res = http_json(f"https://jooble.org/api/{key}",
+            res = http_json(f"https://de.jooble.org/api/{key}",
                             data={"keywords": kw, "location": cfg["location"], "radius": str(radius), "page": str(page)})
             items = res.get("jobs") or []
             for it in items:

@@ -6,6 +6,10 @@ on:
     paths: ["worker/**", ".github/workflows/worker.yml"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,6 +27,7 @@ jobs:
           echo "ok=true" >> $GITHUB_OUTPUT
 
       - name: Выложить Worker
+        id: wr
         if: steps.check.outputs.ok == 'true'
         uses: cloudflare/wrangler-action@v3
         with:
@@ -33,3 +38,22 @@ jobs:
             BRIDGE_PASSWORD
         env:
           BRIDGE_PASSWORD: ${{ secrets.BRIDGE_PASSWORD }}
+
+      - name: Записать адрес моста для сайта
+        if: steps.check.outputs.ok == 'true'
+        env:
+          URL: ${{ steps.wr.outputs.deployment-url }}
+          OUT: ${{ steps.wr.outputs.command-output }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$URL" ]; then URL=$(printf '%s' "$OUT" | grep -oE 'https://[a-z0-9.-]+\.workers\.dev' | head -1); fi
+          echo "Адрес моста: $URL"
+          if [ -z "$URL" ]; then echo "::warning::Адрес не найден в выводе wrangler"; exit 0; fi
+          printf '{"url": "%s"}\n' "$URL" > config/bridge.json
+          git config user.name "jobs-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/bridge.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Адрес моста ИИ: $URL"
+          git pull --rebase -q origin main && git push
+          gh workflow run update.yml --ref main || true
