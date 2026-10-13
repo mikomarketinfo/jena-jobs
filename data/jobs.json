@@ -1,1 +1,1 @@
-{"meta":{},"jobs":[]}
+{"meta":{"updated":"2026-10-13T15:09:51+00:00","location":"Jena","radius_km":30,"new_days":14,"center":{"lat":50.9271,"lon":11.5892},"sources":{"Arbeitsagentur":{"ok":true,"count":0,"complete":true},"Adzuna":{"ok":false,"note":"нет ключа (ADZUNA_APP_ID / ADZUNA_APP_KEY)"},"Jooble":{"ok":false,"note":"нет ключа (JOOBLE_KEY)"}},"removed_today":0},"jobs":[]}
