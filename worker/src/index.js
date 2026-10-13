@@ -90,7 +90,7 @@ const STYLE = `Stil — der Text soll klingen wie von einem echten Menschen gesc
 - VERBOTEN sind diese typischen KI- und Bewerbungsfloskeln: "hiermit bewerbe ich mich", "mit großem Interesse", "Ich bin überzeugt, dass", "Darüber hinaus", "Zudem", "Des Weiteren", "leidenschaftlich", "dynamisch", "spannende Herausforderung", "wertvolle Erfahrungen", "ideale Kandidat", "bringe ich mit", "einen wertvollen Beitrag leisten", "teamfähig, belastbar und flexibel", "in einem dynamischen Umfeld", "meine Fähigkeiten einbringen".
 - Keine Superlative, keine Übertreibungen, keine Aufzählungen mit Spiegelstrichen.
 - Höchstens ein Satz über Motivation — ehrlich und bodenständig (z. B. warum genau diese Arbeit gerade passt).
-- Höchstens zwei Sätze im ganzen Text dürfen mit "Ich" beginnen; Satzanfänge variieren (z. B. "In meinem …", "Dabei …", "Gern …", "Seit …").
+- Nicht mehr als zwei Sätze hintereinander mit "Ich" beginnen; Satzanfänge gelegentlich variieren ("In meinem …", "Dabei …", "Gern …"). KEIN Passiv — immer aktive Ich-Sätze.
 - Der Schlussabsatz besteht aus genau zwei kurzen Sätzen: Verfügbarkeit, dann Gesprächswunsch.
 - Ich-Form, freundlich, sachlich, Niveau B2–C1 — so, wie ein Bewerber mit gutem, aber nicht perfektem Deutsch schreiben würde.`;
 

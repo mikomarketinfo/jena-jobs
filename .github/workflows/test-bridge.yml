@@ -16,11 +16,11 @@ jobs:
           KEY: ${{ secrets.BRIDGE_PASSWORD }}
         run: |
           URL=$(python3 -c "import json;print(json.load(open('config/bridge.json'))['url'])")
-          JOB=$(python3 -c "import json;d=json.load(open('data/jobs.json'));j=next(j for j in d['jobs'] if j['id'].startswith('ba:') and 'Warenannahme' in j['title'] and 'mj' in j['wt']);print(json.dumps({'title':j['title'],'employer':j['employer'],'place':j['place'],'beruf':j.get('beruf',''),'minijob':True,'ref':j['id'][3:]}))")
+          JOB=$(python3 -c "import json;d=json.load(open('data/jobs.json'));j=next(j for j in d['jobs'] if j['id'].startswith('ba:') and 'Warenannahme' in j['title'] and 'mj' in j['wt']);print(json.dumps({'title':j['title'].replace('Minijob','').strip(),'employer':j['employer'],'place':j['place'],'beruf':j.get('beruf',''),'minijob':True,'ref':j['id'][3:]}))")
           C1=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Bridge-Key: wrong" "$URL/check")
           C2=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Bridge-Key: $KEY" "$URL/check")
           export C1 C2
-          BODY=$(JOB="$JOB" python3 -c "import json,os;print(json.dumps({'job':json.loads(os.environ['JOB']),'focus':'simple','cv':'Acht Jahre selbstständig im Online-Handel: internationaler Einkauf, Logistik, Versand, Kundenkommunikation. Team von 11 Mitarbeitenden geführt. Master Systemanalyse, Bachelor Informatik. Deutsch B2/C1.'}))")
+          BODY=$(JOB="$JOB" python3 -c "import json,os;print(json.dumps({'job':json.loads(os.environ['JOB']),'focus':'simple','cv':open('config/test_cv.txt').read()}))")
           curl -s -m 90 -X POST -H "X-Bridge-Key: $KEY" -H "Content-Type: application/json" -d "$BODY" "$URL/letter" -o resp.json -w '%{http_code}' > code.txt || true
           TXT=$(python3 -c "import json;print(json.load(open('resp.json')).get('text',''))" 2>/dev/null || true)
           RB=$(TXT="$TXT" python3 -c "import json,os;print(json.dumps({'text':os.environ['TXT'],'focus':'simple'}))")

@@ -321,7 +321,7 @@ window.LETTER = (function () {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Bridge-Key": key },
         body: JSON.stringify({
-          job: { title: cleanTitle(job.title), employer: job.employer, place: job.place, beruf: job.beruf, type: job.type,
+          job: { title: (job.wt || []).includes("mj") ? (mjTitle(cleanTitle(job.title)) || cleanTitle(job.title)) : cleanTitle(job.title), employer: job.employer, place: job.place, beruf: job.beruf, type: job.type,
             minijob: (job.wt || []).includes("mj"), qe: !!job.qe, ref: job.id && job.id.startsWith("ba:") ? job.id.slice(3) : "" },
           cv, notes: me.extra || "", focus: simpleOn() ? "simple" : "full",
         }),
