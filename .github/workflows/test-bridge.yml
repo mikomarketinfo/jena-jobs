@@ -1,0 +1,40 @@
+name: Проверить мост ИИ
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Пробное письмо
+        env:
+          KEY: ${{ secrets.BRIDGE_PASSWORD }}
+        run: |
+          URL=$(python3 -c "import json;print(json.load(open('config/bridge.json'))['url'])")
+          REF=$(python3 -c "import json;d=json.load(open('data/jobs.json'));print(next(j['id'][3:] for j in d['jobs'] if j['id'].startswith('ba:')))")
+          C1=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Bridge-Key: wrong" "$URL/check")
+          C2=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Bridge-Key: $KEY" "$URL/check")
+          export C1 C2
+          BODY=$(python3 -c "import json;print(json.dumps({'job':{'title':'Lagermitarbeiter','employer':'Test GmbH','place':'Jena','ref':'$REF'},'cv':'Acht Jahre selbststaendig im Online-Handel: Einkauf, Logistik, Versand. Master Systemanalyse.'}))")
+          curl -s -m 90 -X POST -H "X-Bridge-Key: $KEY" -H "Content-Type: application/json" -d "$BODY" "$URL/letter" -o resp.json -w '%{http_code}' > code.txt || true
+          python3 - <<'PY'
+          import json, os
+          try: r = json.load(open("resp.json"))
+          except Exception: r = {"error": open("resp.json").read()[:300] if os.path.exists("resp.json") else "no response"}
+          t = r.get("text", "")
+          out = {"check_wrong": os.environ.get("C1"), "check_right": os.environ.get("C2"), "letter_http": open("code.txt").read().strip(),
+                 "words": len(t.split()), "paragraphs": t.count("\n\n") + (1 if t else 0), "has_description": r.get("has_description"),
+                 "placeholders": t.count("[["), "error": r.get("error"), "preview": t[:400]}
+          json.dump(out, open("data/bridge_test.json", "w"), ensure_ascii=False, indent=1)
+          print(out)
+          PY
+        shell: bash
+      - name: Сохранить результат
+        run: |
+          git config user.name "jobs-bot"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/bridge_test.json && git commit -m "Проверка моста ИИ" && git pull --rebase -q origin main && git push || true
