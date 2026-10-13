@@ -90,6 +90,8 @@ const STYLE = `Stil — der Text soll klingen wie von einem echten Menschen gesc
 - VERBOTEN sind diese typischen KI- und Bewerbungsfloskeln: "hiermit bewerbe ich mich", "mit großem Interesse", "Ich bin überzeugt, dass", "Darüber hinaus", "Zudem", "Des Weiteren", "leidenschaftlich", "dynamisch", "spannende Herausforderung", "wertvolle Erfahrungen", "ideale Kandidat", "bringe ich mit", "einen wertvollen Beitrag leisten", "teamfähig, belastbar und flexibel", "in einem dynamischen Umfeld", "meine Fähigkeiten einbringen".
 - Keine Superlative, keine Übertreibungen, keine Aufzählungen mit Spiegelstrichen.
 - Höchstens ein Satz über Motivation — ehrlich und bodenständig (z. B. warum genau diese Arbeit gerade passt).
+- Höchstens zwei Sätze im ganzen Text dürfen mit "Ich" beginnen; Satzanfänge variieren (z. B. "In meinem …", "Dabei …", "Gern …", "Seit …").
+- Der Schlussabsatz besteht aus genau zwei kurzen Sätzen: Verfügbarkeit, dann Gesprächswunsch.
 - Ich-Form, freundlich, sachlich, Niveau B2–C1 — so, wie ein Bewerber mit gutem, aber nicht perfektem Deutsch schreiben würde.`;
 
 const SYSTEM = `Du bist ein erfahrener deutscher Bewerbungsberater. Du schreibst den Hauptteil eines Anschreibens auf Deutsch.
@@ -98,6 +100,7 @@ Regeln:
 - Schreibe NUR den Haupttext: keine Adressen, kein Datum, keinen Betreff, keine Anrede ("Sehr geehrte …") und keine Grußformel ("Mit freundlichen Grüßen").
 - Absätze durch eine Leerzeile trennen.
 - Verwende ausschließlich Fakten aus dem Lebenslauf und den Notizen. Erfinde nichts: keine Firmennamen, Zahlen, Zertifikate oder Kenntnisse, die nicht genannt sind.
+- Anforderungen aus der Stellenanzeige (z. B. körperliche Belastbarkeit, Heben, Schichtbereitschaft, Führerschein, Staplerschein, Wochenendarbeit) NIEMALS als Eigenschaft des Bewerbers behaupten, wenn sie nicht im Lebenslauf oder in den Notizen stehen. Lieber weglassen.
 - RELEVANZ: Nenne nur Erfahrungen und Qualifikationen, die für genau diese Stelle nützlich sind. Alles andere weglassen — auch wenn es im Lebenslauf steht.
 - Wenn eine wichtige Angabe fehlt (z. B. Eintrittstermin oder Arbeitszeiten), setze einen Platzhalter in doppelten eckigen Klammern, z. B. [[ab sofort / ab TT.MM.JJJJ]].
 - Beziehe dich konkret auf die Aufgaben der Stelle und zeige, welche Erfahrungen dazu passen.
