@@ -114,8 +114,9 @@ Regeln:
 const FOCUS_SIMPLE = `WICHTIG — einfache Tätigkeit bzw. Minijob:
 - Erwähne KEINE Studienabschlüsse (Master, Bachelor, Studium), KEINE Führungserfahrung, KEINE Programmierkenntnisse und KEINE Selbstständigkeit als Unternehmer — das wirkt überqualifiziert und schreckt ab.
 - Erwähne nur praktische, passende Erfahrung (z. B. Umgang mit Waren, Wareneingang, Verpacken, Versand, Kundenkontakt), Zuverlässigkeit, Pünktlichkeit, sorgfältiges Arbeiten, zeitliche Verfügbarkeit.
-- Bei Minijob: kurz erwähnen, dass man langfristig bleiben und später gern mehr Stunden übernehmen möchte.
-- Kurz halten: 3 Absätze, insgesamt 110–170 Wörter.`;
+- Bei Minijob PFLICHT: ein Satz, dass man langfristig bleiben und später gern mehr Stunden übernehmen möchte.
+- Erster Absatz: welche Stelle (Titel, Arbeitgeber) und warum sie gerade passt.
+- 3 Absätze, insgesamt MINDESTENS 120 und höchstens 170 Wörter.`;
 
 const FOCUS_FULL = `Länge: 4 Absätze, insgesamt 200–300 Wörter. Qualifikationen nur nennen, wenn sie zur Stelle passen.`;
 
