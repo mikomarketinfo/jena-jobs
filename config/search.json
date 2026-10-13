@@ -12,13 +12,13 @@
   "sources": {
     "arbeitsagentur": true,
     "adzuna": false,
-    "jooble": true
+    "jooble": false
   },
   "jooble": {
-    "_comment": "У ключа Jooble ~500 запросов. 5 в день ≈ 3 месяца. total_limit можно поднять, если Jooble увеличит лимит.",
+    "_comment": "Нужен ключ для Германии: запросить на https://de.jooble.org/api/about. Ключ с jooble.org (другая страна) отдаёт 0 вакансий. Использовано на тесты: 7 из 500.",
     "total_limit": 500,
     "reserve": 20,
-    "max_requests_per_run": 1,
+    "max_requests_per_run": 5,
     "results_per_query": 50,
     "queries": [
       "Lager",
@@ -26,8 +26,6 @@
       "Einkauf",
       "Minijob",
       "Ausbildung"
-    ],
-    "location": "Deutschland",
-    "radius_any": true
+    ]
   }
 }
