@@ -16,11 +16,11 @@ jobs:
           KEY: ${{ secrets.BRIDGE_PASSWORD }}
         run: |
           URL=$(python3 -c "import json;print(json.load(open('config/bridge.json'))['url'])")
-          REF=$(python3 -c "import json;d=json.load(open('data/jobs.json'));print(next(j['id'][3:] for j in d['jobs'] if j['id'].startswith('ba:')))")
+          JOB=$(python3 -c "import json;d=json.load(open('data/jobs.json'));j=next(j for j in d['jobs'] if j['id'].startswith('ba:') and 'Lager' in j['title'] and j.get('qe'));print(json.dumps({'title':j['title'],'employer':j['employer'],'place':j['place'],'beruf':j.get('beruf',''),'qe':True,'ref':j['id'][3:]}))")
           C1=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Bridge-Key: wrong" "$URL/check")
           C2=$(curl -s -o /dev/null -w '%{http_code}' -X POST -H "X-Bridge-Key: $KEY" "$URL/check")
           export C1 C2
-          BODY=$(python3 -c "import json;print(json.dumps({'job':{'title':'Lagermitarbeiter','employer':'Test GmbH','place':'Jena','ref':'$REF'},'cv':'Acht Jahre selbststaendig im Online-Handel: Einkauf, Logistik, Versand. Master Systemanalyse.'}))")
+          BODY=$(JOB="$JOB" python3 -c "import json,os;print(json.dumps({'job':json.loads(os.environ['JOB']),'cv':'Acht Jahre selbstständig im Online-Handel: internationaler Einkauf, Logistik, Versand, Kundenkommunikation. Team von 11 Mitarbeitenden geführt. Master Systemanalyse, Bachelor Informatik. Deutsch B2/C1.'}))")
           curl -s -m 90 -X POST -H "X-Bridge-Key: $KEY" -H "Content-Type: application/json" -d "$BODY" "$URL/letter" -o resp.json -w '%{http_code}' > code.txt || true
           python3 - <<'PY'
           import json, os
@@ -29,7 +29,7 @@ jobs:
           t = r.get("text", "")
           out = {"check_wrong": os.environ.get("C1"), "check_right": os.environ.get("C2"), "letter_http": open("code.txt").read().strip(),
                  "words": len(t.split()), "paragraphs": t.count("\n\n") + (1 if t else 0), "has_description": r.get("has_description"),
-                 "placeholders": t.count("[["), "error": r.get("error"), "preview": t[:400]}
+                 "placeholders": t.count("[["), "error": r.get("error"), "preview": t[:700]}
           json.dump(out, open("data/bridge_test.json", "w"), ensure_ascii=False, indent=1)
           print(out)
           PY

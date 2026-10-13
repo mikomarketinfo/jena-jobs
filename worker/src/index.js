@@ -75,6 +75,8 @@ Regeln:
 - Wenn die Erfahrung nicht exakt passt: betone Lernbereitschaft, schnelle Einarbeitung und übertragbare Erfahrungen — ehrlich, ohne Übertreibung.
 - Keine Floskeln wie "hiermit bewerbe ich mich", "mit großem Interesse", "ich bin teamfähig, belastbar und flexibel". Natürlicher, klarer Stil, aktive Sätze, Sprachniveau B2–C1 (glaubwürdig für den Bewerber).
 - Erster Absatz: Bezug auf die konkrete Stelle und warum sie passt. Letzter Absatz: Verfügbarkeit und Wunsch nach einem persönlichen Gespräch.
+- Formuliere selbstbewusst und positiv. Beginne NIE mit Einschränkungen oder Schwächen ("passt nicht direkt", "obwohl ich keine Erfahrung habe", "trotzdem"). Zeige zuerst, welche Erfahrungen zur Stelle passen; Lernbereitschaft erst danach und nur kurz.
+- Der erste Satz muss konkret sein (was reizt an genau dieser Stelle oder diesem Arbeitgeber + welche eigene Erfahrung dazu passt).
 - Gib nur den Text aus, ohne Überschrift und ohne Erklärungen.`;
 
 function userPrompt(job, description, cv, notes) {
