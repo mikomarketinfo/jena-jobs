@@ -167,6 +167,17 @@
  "deployments_errors": [],
  "deployments": [
   {
+   "id": "d0f427e5-b7a8-4477-9a2a-1b999a8765e6",
+   "created_on": "2026-10-13T21:03:06.68333Z",
+   "source": "api",
+   "versions": [
+    {
+     "version_id": "7d3fdcaf-3c9d-4555-9db0-75f166febf4c",
+     "percentage": 100
+    }
+   ]
+  },
+  {
    "id": "a6ee987f-a0de-41f1-b80f-39d5aee522e5",
    "created_on": "2026-10-13T20:30:17.801913Z",
    "source": "wrangler",
@@ -261,17 +272,6 @@
    "versions": [
     {
      "version_id": "8abd4253-9a9c-4355-9dc6-ad1df1dd41bc",
-     "percentage": 100
-    }
-   ]
-  },
-  {
-   "id": "0acbaa3e-ccbc-4d96-8313-c0feed51ed5f",
-   "created_on": "2026-10-13T19:45:37.216451Z",
-   "source": "wrangler",
-   "versions": [
-    {
-     "version_id": "c9d644c0-18cf-4e48-a029-b0df6784588b",
      "percentage": 100
     }
    ]
