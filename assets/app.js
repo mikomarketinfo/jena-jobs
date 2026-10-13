@@ -288,23 +288,81 @@
   // ------------------------------------------------------------------ plan
   function renderPlan() {
     const P = state.profile;
-    const dirs = P.directions || [];
-    const presets = (P.presets || []).filter(p => !p.union);
+    const crit = P.criteria || [];
+    const wsum = crit.reduce((a, c) => a + c.w * 5, 0) || 1;
+    const savedQ = state.q; state.q = "";
+    const dirFilters = d => Object.assign(presetFilters(d.preset), d.keywords ? { keywords: d.keywords } : {});
+    const countFor = d => state.data.jobs.filter(j => matches(j, dirFilters(d))).length;
+    const dirs = (P.directions || []).map(d => ({
+      ...d,
+      total: Math.round(crit.reduce((a, c) => a + c.w * ((d.scores || {})[c.id] || 0), 0) / wsum * 100),
+      count: d.preset ? countFor(d) : null,
+    })).sort((a, b) => b.total - a.total);
+    state.q = savedQ;
+    const done = LS.get("roadmap", {});
+    const dots = n => `<span class="dots" title="${n} из 5">${"●".repeat(n)}<i>${"●".repeat(5 - n)}</i></span>`;
+    const sap = P.sap;
+
     $("#planBox").innerHTML = `
       <h2>Мой план</h2>
       <p class="goal">${esc(P.goal || "")}</p>
-      <div class="plan-list">${dirs.map((d, i) => `
-        <article class="plan">
-          <h3><span class="num">${i + 1}</span>${esc(d.name)}</h3>
-          <dl>
-            <dt>Почему подходит</dt><dd>${esc(d.fit)}</dd>
-            <dt>Путь</dt><dd>${esc(d.path)}</dd>
-            <dt>ИИ и рынок</dt><dd>${esc(d.ai)}</dd>
-          </dl>
-        </article>`).join("")}</div>
-      <p class="muted">Быстрые подборки вакансий по направлениям:</p>
-      <div class="btns">${presets.map(p => `<button class="ghost" data-goto="${esc(p.id)}">${esc(p.name)}</button>`).join("")}</div>`;
-    $$("[data-goto]", $("#planBox")).forEach(b => b.onclick = () => { usePreset(b.dataset.goto); switchTab("new"); });
+
+      <h3 class="ph">1. Что у меня есть</h3>
+      <div class="assets">${(P.assets || []).map(g => `
+        <div class="asset"><b>${esc(g.group)}</b><ul>${g.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("")}</div>
+
+      <h3 class="ph">2. Чего я хочу</h3>
+      <ul class="wishes">${(P.wishes || []).map(w => `<li>${esc(w)}</li>`).join("")}</ul>
+
+      <h3 class="ph">3. Сравнение направлений</h3>
+      <p class="muted">Оценки 1–5 — экспертная прикидка по твоему профилю. Итог учитывает веса: опыт и рост ×2, ИИ ×1,5, язык и доход ×1. Вакансии — сколько сейчас найдено в радиусе (нажми, чтобы открыть).</p>
+      <div class="tbl-wrap"><table class="matrix">
+        <thead><tr><th>#</th><th>Направление</th>${crit.map(c => `<th>${esc(c.name)}</th>`).join("")}<th>Итог</th><th>Вакансий</th></tr></thead>
+        <tbody>${dirs.map((d, i) => `
+          <tr class="${i < 2 ? "top" : ""}">
+            <td>${i + 1}</td>
+            <td><details><summary>${esc(d.name)}</summary>
+              <p><b>Почему:</b> ${esc(d.fit)}</p><p><b>Путь:</b> ${esc(d.path)}</p><p><b>ИИ:</b> ${esc(d.ai)}</p></details></td>
+            ${crit.map(c => `<td>${dots((d.scores || {})[c.id] || 0)}</td>`).join("")}
+            <td><b class="score">${d.total}</b></td>
+            <td>${d.preset ? `<button class="linkbtn" data-dir="${i}">${d.count}</button>` : "—"}</td>
+          </tr>`).join("")}</tbody>
+      </table></div>
+
+      <h3 class="ph">4. Вывод</h3>
+      <div class="verdict">
+        <p><b>План A:</b> ${esc(dirs[0] ? dirs[0].name : "")}</p>
+        <p><b>План B:</b> ${esc(dirs[1] ? dirs[1].name : "")}</p>
+        <p><b>Старт сейчас:</b> миниджоб на складе или в сервисе — параллельно с планом A, чтобы быстрее получить немецкий стаж и доход.</p>
+        <p class="muted">Общее ядро твоих сильных сторон: <b>закупки + логистика + IT-системы</b>. Поэтому SAP в закупках и складе — точка, где всё сходится.</p>
+      </div>
+
+      ${sap ? `<h3 class="ph">5. Какой SAP выбрать</h3>
+      <div class="sap">
+        <p class="sap-rec">Рекомендация: <b>${esc(sap.recommend)}</b></p>
+        <p>${esc(sap.why)}</p>
+        <div class="routes">${sap.routes.map(r => `<div class="route"><b>${esc(r.name)}</b><span class="muted">${esc(r.time)}</span><p>Для: ${esc(r.for)}</p><p class="muted">${esc(r.note)}</p></div>`).join("")}</div>
+        <p class="muted">Не рекомендую: ${sap.avoid.map(a => `<b>${esc(a.name)}</b> — ${esc(a.why)}`).join("; ")}.</p>
+      </div>` : ""}
+
+      <h3 class="ph">6. Мои шаги</h3>
+      <div class="roadmap">${(P.roadmap || []).map(r => `
+        <label class="opt ${done[r.id] ? "on" : ""}"><input type="checkbox" data-step="${esc(r.id)}" ${done[r.id] ? "checked" : ""}> ${esc(r.text)}</label>`).join("")}</div>
+      <p class="muted">Галочки сохраняются в этом браузере.</p>`;
+
+    $$("[data-dir]", $("#planBox")).forEach(b => b.onclick = () => {
+      const d = dirs[+b.dataset.dir];
+      if (d.keywords) {
+        state.filters = dirFilters(d); writeFiltersToUI(state.filters); LS.set("filters", state.filters);
+        $("#useDefault").checked = false; LS.set("useDefault", false); setActivePreset(null);
+        $("#presetHint").textContent = "Подборка: " + d.name;
+      } else usePreset(d.preset);
+      switchTab("new");
+    });
+    $$("[data-step]", $("#planBox")).forEach(c => c.onchange = () => {
+      const st = LS.get("roadmap", {}); st[c.dataset.step] = c.checked; LS.set("roadmap", st);
+      c.closest("label").classList.toggle("on", c.checked);
+    });
   }
 
   function usePreset(id) {

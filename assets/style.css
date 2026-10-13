@@ -107,6 +107,29 @@ input[type=range] { accent-color: var(--accent); }
 .preset-hint { margin: 6px 2px 0; color: var(--muted); font-size: 13px; min-height: 1em; }
 
 /* plan */
+.ph { margin: 26px 0 10px; font-size: 17px; }
+.assets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.asset { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; }
+.asset ul, .wishes { margin: 6px 0 0; padding-left: 18px; }
+.wishes li { margin-bottom: 3px; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+.matrix { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 760px; }
+.matrix th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 700; padding: 8px; border-bottom: 1px solid var(--line); background: var(--bg); }
+.matrix td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.matrix tr.top td { background: var(--accent-soft); }
+.matrix summary { cursor: pointer; font-weight: 600; }
+.matrix details p { margin: 6px 0 0; font-size: 13px; }
+.dots { color: var(--accent); letter-spacing: 1px; white-space: nowrap; font-size: 11px; }
+.dots i { color: var(--line); font-style: normal; }
+.score { font-size: 16px; }
+.linkbtn { background: none; border: 0; color: var(--accent); font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; }
+.verdict { background: var(--bg); border-left: 4px solid var(--accent); border-radius: 8px; padding: 6px 14px; }
+.sap-rec { background: var(--gold-soft); color: var(--gold); padding: 8px 12px; border-radius: 10px; }
+.routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+.route { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--bg); font-size: 13.5px; }
+.route span { margin-left: 8px; }
+.route p { margin: 6px 0 0; }
+
 .plan-card { max-width: 980px; }
 .goal { background: var(--accent-soft); color: var(--accent); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
 .plan-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin: 16px 0; }

@@ -67,6 +67,31 @@
       }
     },
     {
+      "id": "sap",
+      "name": "SAP / ERP",
+      "hint": "Вакансии с SAP или ERP в названии: Key User, Stammdaten, Materialwirtschaft, Junior SAP-Berater Logistik/Einkauf.",
+      "filters": {
+        "keywords": [
+          "SAP",
+          "S/4HANA",
+          "S/4 HANA",
+          "ERP",
+          "EWM",
+          "Key User",
+          "Stammdaten",
+          "Materialwirtschaft",
+          "Warenwirtschaft",
+          "Disposition",
+          "Disponent"
+        ],
+        "show_job": true,
+        "show_ausbildung": true,
+        "minijob": "include",
+        "career_only": false,
+        "sort": "career"
+      }
+    },
+    {
       "id": "it",
       "name": "IT",
       "hint": "Ausbildung Fachinformatiker (Systemintegration, Digitale Vernetzung, Daten- und Prozessanalyse), IT-System-Elektroniker; плюс вакансии для прямого входа (IT-Support, Administrator).",
@@ -199,46 +224,139 @@
   ],
   "directions": [
     {
-      "name": "Миниджоб → часы → руководство точкой",
-      "fit": "Опыт: 8 лет своего онлайн-магазина, прокат с командой из 11 человек, миниджоб в прокате каноэ в Jena.",
-      "path": "Aushilfe (Minijob) на складе, в прокате или сервисе → Teilzeit/Vollzeit → Schichtleiter / Stationsleitung / стаж. руководитель → руководство складом или небольшим филиалом. Сразу говори на собеседовании, что хочешь расти и брать часы.",
-      "ai": "Низкий риск: работа с людьми, товаром и организацией смен."
+      "name": "SAP MM/EWM + закупки и диспозиция",
+      "preset": "sap",
+      "scores": {
+        "exp": 5,
+        "lead": 4,
+        "ai": 3,
+        "lang": 4,
+        "pay": 4
+      },
+      "fit": "Соединяет все три твои сильные стороны: закупки из своего магазина, логистику и IT/анализ систем.",
+      "path": "Курс SAP S/4HANA Einkauf (MM) + Lager (EWM), 3–4 месяца, часто через Bildungsgutschein → Sachbearbeiter Einkauf / Disponent / Key User SAP → Teamleitung Einkauf или Logistik.",
+      "ai": "Средний риск: ввод заказов автоматизируют, но настройка процессов, поставщики и контроль — нет."
     },
     {
-      "name": "IT: Fachinformatiker Systemintegration / Digitale Vernetzung, IT-System-Elektroniker, Daten- und Prozessanalyse",
-      "fit": "Bachelor Computer Science, Master Systemanalytik, практика в GÖPEL electronic (C#, .NET MVC, SQL, Active Directory), переквалификация на электрика.",
-      "path": "С высшим образованием Ausbildung часто можно сократить (обычно до ~2 лет) или пройти как Umschulung через Bildungsgutschein Agentur für Arbeit. Дальше: администратор → Teamleitung IT-Betrieb / Projektleitung.",
-      "ai": "Сети, железо, инфраструктура и безопасность требуют присутствия и ответственности — их ИИ заменяет медленнее, чем рутинное программирование. IT-System-Elektroniker хорошо сочетает IT и твою электрику. Daten- und Prozessanalyse ближе всего к твоему Master."
+      "name": "Закупки напрямую (после оценки диплома)",
+      "preset": "einkauf",
+      "scores": {
+        "exp": 5,
+        "lead": 3,
+        "ai": 3,
+        "lang": 4,
+        "pay": 5
+      },
+      "fit": "8 лет международных закупок и переговоров — прямо то, что ищут.",
+      "path": "Zeugnisbewertung ZAB → Sachbearbeiter Einkauf / Einkaufsassistenz / Technischer Einkäufer → strategischer Einkauf → Teamleitung.",
+      "ai": "Средний риск, переговоры и работа с поставщиками остаются за людьми."
     },
     {
-      "name": "Логистика: Fachkraft für Lagerlogistik / Kaufmann für Spedition und Logistikdienstleistung",
-      "fit": "Управлял закупками и логистикой своего магазина, знаешь IT-системы — это ценно для складских систем (WMS/ERP).",
-      "path": "Ausbildung (сокращённая) → Disponent / Schichtleiter → Lagerleitung. Позже — Weiterbildung Fachwirt für Logistiksysteme.",
-      "ai": "Склады автоматизируются, но растёт спрос на тех, кто управляет людьми и системами одновременно."
+      "name": "Логистика: Ausbildung → Lagerleitung",
+      "preset": "logistik",
+      "scores": {
+        "exp": 3,
+        "lead": 4,
+        "ai": 3,
+        "lang": 5,
+        "pay": 2
+      },
+      "fit": "Опыт логистики магазина и знание IT — плюс для складских систем.",
+      "path": "Fachkraft für Lagerlogistik (сокращённая) или Kaufmann für Spedition → Disponent / Schichtleiter → Lagerleitung; позже Fachwirt für Logistiksysteme.",
+      "ai": "Склады автоматизируются, но нужны люди, которые управляют командой и системами."
     },
     {
-      "name": "Закупки: Groß- und Außenhandelsmanagement / Industriekaufmann",
-      "fit": "Международные закупки (Европа, Азия, Украина), переговоры — это прямо твой опыт.",
-      "path": "Можно пробовать сразу без Ausbildung: Sachbearbeiter Einkauf / Einkaufsassistenz. Иначе Ausbildung → Einkäufer → strategischer Einkauf → Teamleitung Einkauf.",
-      "ai": "Рутинные заказы автоматизируют, а переговоры, работа с поставщиками и анализ рисков остаются за людьми — твои сильные стороны."
+      "name": "Миниджоб на складе / в сервисе → рост",
+      "preset": "minijob",
+      "scores": {
+        "exp": 3,
+        "lead": 3,
+        "ai": 4,
+        "lang": 5,
+        "pay": 3
+      },
+      "fit": "Быстрый старт и немецкий опыт работы в резюме; хорошо совмещается с курсом.",
+      "path": "Minijob → больше часов → Teilzeit/Vollzeit → Schichtleiter. Лучше всего как старт параллельно с одним из основных путей.",
+      "ai": "Низкий риск."
     },
     {
-      "name": "Дополнительно: E-Commerce, Digitalisierungsmanagement",
-      "fit": "Онлайн-магазин + анализ систем = редкое сочетание.",
-      "path": "Kaufmann/-frau im E-Commerce или für Digitalisierungsmanagement → E-Commerce-Manager / Prozessmanager.",
-      "ai": "Средний риск: тексты и рутина автоматизируются, процессы и интеграция систем — нет."
+      "name": "IT: Fachinformatiker Systemintegration / IT-System-Elektroniker",
+      "preset": "it",
+      "scores": {
+        "exp": 4,
+        "lead": 3,
+        "ai": 4,
+        "lang": 4,
+        "pay": 2
+      },
+      "fit": "Диплом Computer Science, IT-практикум, электрика.",
+      "path": "Сокращённая Ausbildung или Umschulung (~2 года) → администратор → Teamleitung IT-Betrieb.",
+      "ai": "Сети, железо и безопасность ИИ заменяет медленнее, чем программирование."
     },
     {
-      "name": "Дополнительно: Elektroniker (Energie- und Gebäudetechnik / Betriebstechnik)",
-      "fit": "Уже есть Nachqualifizierung как электрик в ÜAG.",
-      "path": "Ausbildung / Umschulung → Elektroniker → Vorarbeiter / Meister → своя бригада. Очень высокий спрос в Thüringen.",
-      "ai": "Минимальный риск: физическая работа на объектах."
+      "name": "Junior SAP-Berater (Logistik / Einkauf)",
+      "preset": "sap",
+      "scores": {
+        "exp": 4,
+        "lead": 3,
+        "ai": 3,
+        "lang": 2,
+        "pay": 5
+      },
+      "fit": "Systemanalytik + закупки + IT — профиль консультанта. В регионе Jena есть вакансии Junior SAP Berater Logistik.",
+      "path": "Курс с официальным экзаменом SAP (C_TS452, Sourcing and Procurement) → Junior Berater → Berater → Projektleitung.",
+      "ai": "Средний риск. Требует уверенного немецкого (лучше C1) для работы с клиентами.",
+      "keywords": [
+        "SAP Berater",
+        "SAP-Berater",
+        "SAP Consultant",
+        "SAP-Consultant",
+        "Junior SAP",
+        "AMS Berater",
+        "SAP Lead"
+      ]
     },
     {
-      "name": "Прямой вход с дипломом",
-      "fit": "Master Systemanalytik можно официально оценить (Zeugnisbewertung ZAB, база anabin).",
-      "path": "С оценкой диплома открываются позиции IT-Support, ERP-Anwender / Key User, Disponent, Sachbearbeiter Einkauf без Ausbildung — быстрее и с большей зарплатой.",
-      "ai": "Зависит от позиции; ERP/процессы — средний риск."
+      "name": "Elektroniker (Energie- und Gebäudetechnik / Betriebstechnik)",
+      "preset": "extra",
+      "scores": {
+        "exp": 3,
+        "lead": 3,
+        "ai": 5,
+        "lang": 5,
+        "pay": 2
+      },
+      "fit": "Уже есть переквалификация на электрика.",
+      "path": "Ausbildung / Umschulung → Elektroniker → Vorarbeiter / Meister.",
+      "ai": "Минимальный риск, очень высокий спрос.",
+      "keywords": [
+        "Elektroniker",
+        "Elektriker",
+        "Elektrotechnik",
+        "Energie- und Gebäudetechnik",
+        "Betriebstechnik"
+      ]
+    },
+    {
+      "name": "E-Commerce / Digitalisierungsmanagement",
+      "preset": "extra",
+      "scores": {
+        "exp": 4,
+        "lead": 3,
+        "ai": 2,
+        "lang": 3,
+        "pay": 2
+      },
+      "fit": "Онлайн-магазин + анализ систем.",
+      "path": "Ausbildung Kaufmann im E-Commerce / für Digitalisierungsmanagement → E-Commerce- или Prozessmanager.",
+      "ai": "Тексты и рутина автоматизируются быстрее всего.",
+      "keywords": [
+        "E-Commerce",
+        "Digitalisierungsmanagement",
+        "Onlinehandel",
+        "Online-Shop",
+        "Webshop"
+      ]
     }
   ],
   "career_keywords": {
@@ -288,7 +406,9 @@
       "strategischer Einkäufer",
       "Shift Lead",
       "Projektassistenz",
-      "Administrator"
+      "Administrator",
+      "Junior SAP",
+      "SAP Berater"
     ],
     "einstieg_mit_perspektive": [
       "Lagerlogistik",
@@ -309,5 +429,151 @@
       "Elektroniker",
       "Disposition"
     ]
-  }
+  },
+  "assets": [
+    {
+      "group": "IT и системы",
+      "items": [
+        "Bachelor Computer Science",
+        "Master Systemanalytik",
+        "C#, .NET MVC, SQL",
+        "Active Directory, безопасный доступ",
+        "Анализ и оптимизация бизнес-процессов"
+      ]
+    },
+    {
+      "group": "Закупки и торговля",
+      "items": [
+        "8 лет собственный онлайн-магазин",
+        "Международные закупки: Европа, Азия, Украина",
+        "Управление продажами и логистикой",
+        "Переговоры с поставщиками"
+      ]
+    },
+    {
+      "group": "Руководство",
+      "items": [
+        "Руководил командой из 11 человек",
+        "Организация проката: персонал, ремонт, учёт",
+        "Своё дело — два бизнеса"
+      ]
+    },
+    {
+      "group": "Техника",
+      "items": [
+        "Переквалификация на электрика",
+        "Ремонт техники (веломобили, электромобили)"
+      ]
+    },
+    {
+      "group": "Языки и прочее",
+      "items": [
+        "Deutsch B2/C1 (Berufssprachkurs B2: 198,75/240)",
+        "English — хороший средний",
+        "Русский, украинский — родные",
+        "MS Office, Photoshop"
+      ]
+    }
+  ],
+  "wishes": [
+    "Быстрый рост (1–2 года) до небольшой руководящей роли",
+    "Направление, устойчивое к изменениям из-за ИИ",
+    "Реальный спрос в Jena и округе",
+    "Использовать уже имеющийся опыт, а не начинать с нуля",
+    "Без чистых продаж",
+    "Начать зарабатывать как можно раньше (миниджоб — как старт)"
+  ],
+  "criteria": [
+    {
+      "id": "exp",
+      "name": "Мой опыт",
+      "w": 2
+    },
+    {
+      "id": "lead",
+      "name": "Рост до руководства",
+      "w": 2
+    },
+    {
+      "id": "ai",
+      "name": "Устойчивость к ИИ",
+      "w": 1.5
+    },
+    {
+      "id": "lang",
+      "name": "Подходит по языку",
+      "w": 1
+    },
+    {
+      "id": "pay",
+      "name": "Скорость дохода",
+      "w": 1
+    }
+  ],
+  "sap": {
+    "recommend": "SAP MM (Einkauf / Sourcing and Procurement) + EWM (склад)",
+    "why": "MM — это закупки, твой главный опыт. EWM — склад, путь к Lagerleitung. Вместе они закрывают и закупки, и логистику; плюс твой IT-бэкграунд даёт быстрое понимание системы.",
+    "routes": [
+      {
+        "name": "Anwender / Key User MM + EWM",
+        "time": "~3 месяца",
+        "for": "Sachbearbeiter Einkauf, Disponent, Lager с SAP, Key User",
+        "note": "Быстрее, сертификаты пользователя SAP. Требуют немецкий от B2 — у тебя есть."
+      },
+      {
+        "name": "Berater-Zertifizierung MM (экзамен C_TS452)",
+        "time": "~4 месяца",
+        "for": "Junior SAP-Berater, Key User, внутренний SAP-специалист",
+        "note": "Официальный экзамен SAP, выше потолок и зарплата, но вход на позиции консультанта сложнее."
+      }
+    ],
+    "avoid": [
+      {
+        "name": "FI/CO",
+        "why": "бухгалтерия и контроллинг — нет опыта"
+      },
+      {
+        "name": "HCM / SuccessFactors",
+        "why": "кадры — не твоё направление"
+      },
+      {
+        "name": "ABAP",
+        "why": "программирование — сильнее всего подвержено ИИ"
+      },
+      {
+        "name": "SD",
+        "why": "продажи — ты их исключил"
+      }
+    ]
+  },
+  "roadmap": [
+    {
+      "id": "zab",
+      "text": "Подать на Zeugnisbewertung (ZAB) для Master и Bachelor — открывает позиции без Ausbildung"
+    },
+    {
+      "id": "aa",
+      "text": "Записаться на Beratung в Agentur für Arbeit: спросить Bildungsgutschein на SAP MM/EWM или Umschulung"
+    },
+    {
+      "id": "cv",
+      "text": "Обновить Lebenslauf: на первое место — закупки, логистика, анализ систем; добавить цель SAP"
+    },
+    {
+      "id": "mj",
+      "text": "Откликнуться на 3–5 миниджобов (склад, сервис) — старт и немецкий стаж"
+    },
+    {
+      "id": "einkauf",
+      "text": "Откликнуться на 5 вакансий Sachbearbeiter Einkauf / Einkaufsassistenz / Disponent"
+    },
+    {
+      "id": "sapkurs",
+      "text": "Выбрать курс SAP (Key User или Berater) и согласовать с Agentur"
+    },
+    {
+      "id": "ausb",
+      "text": "Параллельно: 2–3 заявки на Ausbildung 2027 (Groß- und Außenhandel, Lagerlogistik, Fachinformatiker)"
+    }
+  ]
 }
