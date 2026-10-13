@@ -147,6 +147,7 @@ def _debug(base, params, res):
         "keys": sorted(res.keys())[:20] if isinstance(res, dict) else type(res).__name__,
         "total": _total(res, None), "n": len(items),
         "item_keys": sorted(items[0].keys())[:30] if items and isinstance(items[0], dict) else None,
+        "sample": {k: (str(v)[:160]) for k, v in items[0].items()} if items and isinstance(items[0], dict) and len(API_DEBUG) < 2 else None,
     })
 
 
@@ -167,6 +168,25 @@ def ba_query(base, params, max_pages):
         page += 1
         time.sleep(0.4)
     return out, False
+
+
+def _date(v):
+    """Первая дата YYYY-MM-DD из строки/словаря (v6 отдаёт периоды {von, bis})."""
+    if v in (None, ""):
+        return None
+    if isinstance(v, dict):
+        v = _first(v, "von", "start", "beginn", "datum") or json.dumps(v)
+    m = re.search(r"\d{4}-\d{2}-\d{2}", str(v))
+    return m.group(0) if m else None
+
+
+def _num(v):
+    if isinstance(v, dict):
+        v = _first(v, "wert", "value", "km")
+    try:
+        return round(float(str(v).replace(",", ".").split()[0]), 1) if v not in (None, "") else None
+    except (ValueError, IndexError):
+        return None
 
 
 def _first(d, *keys):
@@ -242,24 +262,30 @@ def fetch_ba(cfg):
                     beruf = _first(it, "beruf", "hauptberuf") or ""
                     if isinstance(beruf, dict):
                         beruf = beruf.get("bezeichnung") or ""
-                    pub = str(_first(it, "aktuelleVeroeffentlichungsdatum", "veroeffentlichungsdatum", "veroeffentlichtAm", "modifikationsTimestamp") or "")
+                    pub = _date(_first(it, "aktuelleVeroeffentlichungsdatum", "datumErsteVeroeffentlichung",
+                                       "veroeffentlichungsdatum", "veroeffentlichungszeitraum", "aenderungsdatum"))
                     j = {
                         "id": jid,
                         "src": "Arbeitsagentur",
-                        "title": title,
+                        "title": re.sub(r"\s+", " ", title).strip(),
                         "beruf": str(beruf),
                         "employer": str(emp),
                         "place": " ".join(str(x) for x in [ort.get("plz"), ort.get("ort")] if x),
-                        "lat": ko.get("lat") or ko.get("breite"),
-                        "lon": ko.get("lon") or ko.get("laenge"),
+                        "lat": _num(ko.get("lat") or ko.get("breite") or ko.get("breitengrad")),
+                        "lon": _num(ko.get("lon") or ko.get("laenge") or ko.get("laengengrad")),
+                        "dist_api": _num(_first(it, "entfernung") or ort.get("entfernung")),
                         "type": jtype,
                         "wt": [],
-                        "published": pub[:10] or None,
-                        "start": str(_first(it, "eintrittsdatum") or "")[:10] or None,
+                        "published": pub,
+                        "start": _date(_first(it, "eintrittsdatum", "eintrittszeitraum")),
                         "url": "https://www.arbeitsagentur.de/jobsuche/jobdetail/" + urllib.parse.quote(ref),
                         "ext": it.get("externeUrl") or None,
                     }
+                    if it.get("quereinstiegGeeignet") is True:
+                        j["qe"] = True
                     jobs[jid] = j
+                if it.get("istGeringfuegigeBeschaeftigung") is True and "mj" not in j["wt"]:
+                    j["wt"].append("mj")
                 if jtype == "ausbildung":
                     j["type"] = "ausbildung"
                 if tag and tag not in j["wt"]:
@@ -398,8 +424,14 @@ def merge(old: dict, fetched: dict[str, tuple[list, bool]], cfg) -> dict:
                 j["first_seen"] = j["published"]
             else:
                 j["first_seen"] = TODAY
+            pub = j.get("published")
+            if pub and pub <= TODAY and pub < j["first_seen"]:
+                j["first_seen"] = pub  # опубликована раньше, чем мы её увидели
             j["last_seen"] = TODAY
             j["dist"] = haversine(center.get("lat"), center.get("lon"), j.get("lat"), j.get("lon"))
+            if j["dist"] is None:
+                j["dist"] = j.get("dist_api")
+            j.pop("dist_api", None)
             j["wt"] = sorted(set(j.get("wt") or []))
             result[j["id"]] = j
 
