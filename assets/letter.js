@@ -299,7 +299,7 @@ window.LETTER = (function () {
   }
 
   // ---------------------------------------------------------------- ИИ (Cloudflare Workers AI через мост)
-  const bridgeUrl = () => (LS.get("bridgeUrl", "") || window.__BRIDGE_URL || (window.__PROFILE && window.__PROFILE.ai_bridge_url) || "").replace(/\/+$/, "");
+  const bridgeUrl = () => (window.__BRIDGE_URL || LS.get("bridgeUrl", "") || (window.__PROFILE && window.__PROFILE.ai_bridge_url) || "").replace(/\/+$/, "");
 
   // резюме по умолчанию для «Я», если файл не загружен: факты из шаблонов профиля
   function defaultCV() {

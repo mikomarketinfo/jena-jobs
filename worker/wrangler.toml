@@ -1,5 +1,5 @@
 # Мост «Anschreiben с ИИ» (Cloudflare Workers AI)
-name = "round-forest-2940"
+name = "jena-jobs-bridge"
 main = "src/index.js"
 compatibility_date = "2025-09-01"
 workers_dev = true

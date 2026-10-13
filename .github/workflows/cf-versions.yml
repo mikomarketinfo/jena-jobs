@@ -1,0 +1,37 @@
+name: Cloudflare — версии round-forest-2940 (только чтение)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Список версий и выкладок
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACC: 4d7b394334d28ee8c87cc6d1a6e580b6
+        run: |
+          H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          curl -s -H "$H" "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/round-forest-2940/versions?per_page=50" > v.json
+          curl -s -H "$H" "https://api.cloudflare.com/client/v4/accounts/$ACC/workers/scripts/round-forest-2940/deployments" > d.json
+          python3 - <<'PY'
+          import json
+          v=json.load(open("v.json")); d=json.load(open("d.json"))
+          items=(v.get("result") or {}).get("items") or v.get("result") or []
+          out={"versions_ok": v.get("success"), "versions_errors": v.get("errors"),
+               "versions":[{"id":x.get("id"),"number":x.get("number"),"created_on":(x.get("metadata") or {}).get("created_on"),
+                            "source":(x.get("metadata") or {}).get("source"),"author":(x.get("metadata") or {}).get("author_email"),
+                            "message":((x.get("annotations") or {}).get("workers/message"))} for x in items],
+               "deployments_ok": d.get("success"), "deployments_errors": d.get("errors"),
+               "deployments":[{"id":x.get("id"),"created_on":x.get("created_on"),"source":x.get("source"),
+                               "versions":x.get("versions")} for x in ((d.get("result") or {}).get("deployments") or [])][:15]}
+          json.dump(out, open("data/cf_versions.json","w"), indent=1)
+          print(json.dumps(out, indent=1)[:3000])
+          PY
+          git config user.name "jobs-bot"; git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cf_versions.json && git commit -m "Cloudflare: список версий" && git pull --rebase -q origin main && git push || true

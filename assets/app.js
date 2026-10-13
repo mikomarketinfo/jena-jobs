@@ -88,7 +88,7 @@
   }
 
   // ---------------------------------------------------------------- Jooble (хранится в мосте, обновляется по кнопке)
-  const bridge = () => (LS.get("bridgeUrl", "") || window.__BRIDGE_URL || "").replace(/\/+$/, "");
+  const bridge = () => (window.__BRIDGE_URL || LS.get("bridgeUrl", "") || "").replace(/\/+$/, "");
   const normKey = j => lower(j.title).replace(/\(.*?\)|[^a-zäöüß0-9]+/g, "") + "|" + lower(j.employer).replace(/[^a-zäöüß0-9]+/g, "");
   state.jooble = { used: null, limit: 500, updated: null };
 
