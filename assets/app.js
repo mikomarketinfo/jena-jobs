@@ -91,7 +91,7 @@
     const counts = {};
     state.data.jobs.forEach(j => { const n = srcName(j); counts[n] = (counts[n] || 0) + 1; });
     const inactive = Object.entries((state.data.meta || {}).sources || {})
-      .filter(([k, v]) => !v.ok && !counts[k]).map(([k, v]) => [k, v.note || "не подключён"]);
+      .filter(([k, v]) => !v.ok && !counts[k] && !/выключен/.test(v.note || "")).map(([k, v]) => [k, v.note || "не подключён"]);
     const chips = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([n, c]) =>
       `<button class="src-chip ${state.sourcesOff.includes(n) ? "" : "on"}" data-src="${esc(n)}" aria-pressed="${!state.sourcesOff.includes(n)}">${esc(n)} <span>${c}</span></button>`).join("") +
       inactive.map(([n, note]) => `<button class="src-chip off" disabled title="${esc(note)} — см. README, раздел «Подключить больше бирж»">${esc(n)} <span>нет ключа</span></button>`).join("");
