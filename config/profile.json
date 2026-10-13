@@ -643,5 +643,91 @@
     "Duales Studium",
     "Aushilfe",
     "Helfer"
-  ]
+  ],
+  "letter": {
+    "_comment": "Шаблоны Anschreiben. [[Подсказка]] — место, которое нужно заполнить или проверить (подсвечивается). Личные контакты здесь НЕ хранятся — только в браузере.",
+    "categories": {
+      "ausbildung": [
+        "Ausbildung",
+        "Azubi",
+        "Auszubildende",
+        "Duales Studium"
+      ],
+      "einkauf": [
+        "Einkauf",
+        "Einkäufer",
+        "Beschaffung",
+        "Bestellwesen",
+        "Auftragsabwicklung",
+        "Auftragsbearbeitung",
+        "Disposition",
+        "Disponent",
+        "Groß- und Außenhandel",
+        "Materialwirtschaft",
+        "Import",
+        "Export"
+      ],
+      "lager": [
+        "Lager",
+        "Logistik",
+        "Kommissionier",
+        "Wareneingang",
+        "Warenausgang",
+        "Warenannahme",
+        "Versand",
+        "Verlade",
+        "Spedition",
+        "Inventur"
+      ],
+      "it": [
+        "IT-",
+        "Informatik",
+        "Fachinformatiker",
+        "Support",
+        "Helpdesk",
+        "Administrator",
+        "Netzwerk",
+        "SQL",
+        "Software",
+        "System"
+      ],
+      "office": [
+        "Büro",
+        "Sachbearbeit",
+        "Assistenz",
+        "Backoffice",
+        "Verwaltung",
+        "Kaufmännisch",
+        "E-Commerce",
+        "Daten",
+        "Stammdaten",
+        "Office"
+      ]
+    },
+    "intro": {
+      "job": "mit großem Interesse habe ich Ihre Stellenanzeige als {title} {source} gelesen. Die Aufgaben passen sehr gut zu meinen Erfahrungen, und ich möchte mich in Ihrem Unternehmen langfristig weiterentwickeln.",
+      "minijob": "mit großem Interesse habe ich Ihre Anzeige für einen Minijob als {title} {source} gelesen. Ich suche eine zuverlässige Tätigkeit, in der ich mich gut einarbeiten und meine Stunden später gern erhöhen kann.",
+      "ausbildung": "hiermit bewerbe ich mich um einen Ausbildungsplatz als {title} {source}. Ich möchte meine bisherigen Erfahrungen mit einem deutschen Berufsabschluss verbinden und mich in Ihrem Unternehmen langfristig entwickeln."
+    },
+    "background": "Ich habe einen Master-Abschluss in Systemanalyse und einen Bachelor in Informatik. Acht Jahre lang war ich selbstständig im Online-Handel tätig und habe dabei den internationalen Einkauf von Waren aus Europa und Asien, die Logistik sowie die Kundenkommunikation verantwortet.",
+    "blocks": {
+      "einkauf": "Im Einkauf bringe ich praktische Erfahrung mit: Lieferantenauswahl, Preisverhandlungen, Bestellabwicklung und die Steuerung des Warenflusses habe ich in meinem eigenen Unternehmen über Jahre selbst übernommen.",
+      "lager": "Wareneingang, Lagerorganisation und Versand kenne ich aus der Praxis meines Online-Handels. In Warenwirtschafts- und IT-Systeme arbeite ich mich dank meines technischen Hintergrunds schnell ein.",
+      "it": "Während meines IT-Praktikums habe ich eine Webanwendung mit C#, .NET MVC und SQL entwickelt, einschließlich einer sicheren Anmeldung über Active Directory. Die Anwendung wird im Unternehmen produktiv eingesetzt.",
+      "office": "Strukturiertes Arbeiten, sichere Kenntnisse in MS Office und ein gutes Verständnis von Geschäftsprozessen gehören zu meinen Stärken. Aus meiner Selbstständigkeit bin ich es gewohnt, Abläufe zu organisieren und Aufgaben zuverlässig zu erledigen.",
+      "generic": "Aus meiner Selbstständigkeit bin ich es gewohnt, Verantwortung zu übernehmen, Abläufe zu organisieren und auch unter Zeitdruck zuverlässig zu arbeiten.",
+      "ausbildung": "Mein Studium und meine Berufserfahrung geben mir eine gute Grundlage für die Ausbildung. [[Falls gewünscht: Ich würde gern prüfen, ob eine Verkürzung der Ausbildung möglich ist. — oder diesen Satz löschen]]"
+    },
+    "sap": "Aktuell bilde ich mich im Bereich SAP S/4HANA (Einkauf/MM) weiter. [[Nur wenn zutreffend — sonst Satz löschen]]",
+    "team": "Als Unternehmer habe ich ein Team von elf Mitarbeitenden geführt. Daher weiß ich, wie wichtig Zuverlässigkeit, Teamarbeit und klare Kommunikation sind.",
+    "learning": "Auch wenn ich in genau dieser Tätigkeit in Deutschland noch keine Berufserfahrung habe, lerne ich schnell und arbeite mich zügig in neue Abläufe ein. Eine gründliche Einarbeitung sehe ich als Chance, mich von Anfang an einzubringen.",
+    "language": "Ich spreche Deutsch auf B2/C1-Niveau, gutes Englisch sowie Russisch und Ukrainisch als Muttersprachen.",
+    "availability": {
+      "job": "Ich stehe Ihnen [[ab sofort / ab TT.MM.JJJJ]] zur Verfügung.",
+      "minijob": "Ich kann [[Wochentage und Uhrzeiten]] arbeiten und stehe [[ab sofort]] zur Verfügung.",
+      "ausbildung": "Ich kann die Ausbildung zum [[01.08.2027]] beginnen."
+    },
+    "closing": "Über eine Einladung zu einem persönlichen Gespräch freue ich mich sehr.",
+    "attachments": "Anlagen: Lebenslauf, Zeugnisse [[Liste prüfen]]"
+  }
 }

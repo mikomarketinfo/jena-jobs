@@ -201,6 +201,7 @@
         <span class="muted src">${esc(j.src)} · найдено ${fmtDate(j.first_seen)}</span>
       </div>
       ${alt ? `<div class="alts">также: ${alt}</div>` : ""}
+      <div class="job-actions"><button class="lt-btn" data-letter="${esc(j.id)}">✉ Anschreiben erstellen</button></div>
     </article>`;
   }
 
@@ -447,6 +448,12 @@
     });
     let t; $("#q").addEventListener("input", e => { clearTimeout(t); t = setTimeout(() => { state.q = e.target.value.trim(); resetLimits(); render(); }, 150); });
     document.addEventListener("click", e => {
+      const lb = e.target.closest("[data-letter]");
+      if (lb) {
+        const j = state.data.jobs.find(x => x.id === lb.dataset.letter);
+        if (j && window.LETTER) window.LETTER.open(j, state.profile);
+        return;
+      }
       const m = e.target.closest(".more"); if (!m) return;
       state.limit[m.dataset.type] += 50; render();
     });
